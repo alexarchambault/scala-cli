@@ -32,8 +32,13 @@ object Metabrowse extends ScalaCommand[MetabrowseOptions] {
     val logger = options.shared.logger
 
     val bloopRifleConfig = options.shared.bloopRifleConfig()
+    val buildThreads = BuildThreads.create()
 
-    val build = Build.build(inputs, options.buildOptions, bloopRifleConfig, logger)
+    def onOptions(options: BuildOptions): Unit = {
+      // ???
+    }
+
+    val build = Build.build(inputs, options.buildOptions, buildThreads, bloopRifleConfig, logger, onOptions(_))
 
     val successfulBuild = build match {
       case f: Build.Failed =>

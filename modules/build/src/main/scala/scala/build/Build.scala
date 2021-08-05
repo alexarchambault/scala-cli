@@ -111,7 +111,8 @@ object Build {
     options: BuildOptions,
     logger: Logger,
     buildClient: BloopBuildClient,
-    bloopServer: bloop.BloopServer
+    bloopServer: bloop.BloopServer,
+    checkOptions: BuildOptions => Unit
   ): Build = {
 
     val sources = Sources.forInputs(
@@ -170,7 +171,8 @@ object Build {
     options: BuildOptions,
     threads: BuildThreads,
     bloopConfig: BloopRifleConfig,
-    logger: Logger
+    logger: Logger,
+    checkOptions: BuildOptions => Unit
   ): Build = {
 
     val buildClient = BloopBuildClient.create(
@@ -193,7 +195,8 @@ object Build {
         options,
         logger,
         buildClient,
-        bloopServer
+        bloopServer,
+        checkOptions
       )
     }
   }
@@ -204,14 +207,15 @@ object Build {
     bloopConfig: BloopRifleConfig,
     logger: Logger
   ): Build =
-    build(inputs, options, BuildThreads.create(), bloopConfig, logger)
+    build(inputs, options, BuildThreads.create(), bloopConfig, logger, _ => ())
 
   def watch(
     inputs: Inputs,
     options: BuildOptions,
     bloopConfig: BloopRifleConfig,
     logger: Logger,
-    postAction: () => Unit = () => ()
+    postAction: () => Unit = () => (),
+    checkOptions: BuildOptions => Unit = _ => ()
   )(action: Build => Unit): Watcher = {
 
     val buildClient = BloopBuildClient.create(
@@ -233,7 +237,7 @@ object Build {
 
     def run() = {
       try {
-        val build0 = build(inputs, options, logger, buildClient, bloopServer)
+        val build0 = build(inputs, options, logger, buildClient, bloopServer, checkOptions)
         action(build0)
       } catch {
         case NonFatal(e) =>
@@ -656,7 +660,7 @@ object Build {
           runJmh = build.options.jmhOptions.runJmh.map(_ => false)
         )
       )
-      val jmhBuild = Build.build(jmhInputs, updatedOptions, logger, buildClient, bloopServer)
+      val jmhBuild = Build.build(jmhInputs, updatedOptions, logger, buildClient, bloopServer, _ => ())
       Some(jmhBuild)
     }
     else None
