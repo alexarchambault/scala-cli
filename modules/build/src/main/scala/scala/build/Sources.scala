@@ -10,6 +10,7 @@ final case class Sources(
   mainClass: Option[String],
   resourceDirs: Seq[os.Path],
   buildOptions: BuildOptions
+  // buildOptions: Seq[(os.Path, BuildOptions)]
 ) {
 
   def generateSources(generatedSrcRoot: os.Path): Seq[GeneratedSource] = {
