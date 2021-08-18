@@ -1,6 +1,6 @@
 package scala.build.preprocessing
 
-import com.virtuslab.using_directives.custom.model.{Path, Value}
+import com.virtuslab.using_directives.custom.model.{Path, StringValue, Value}
 import dependency.AnyDependency
 import dependency.parser.DependencyParser
 
@@ -10,7 +10,8 @@ import scala.collection.JavaConverters._
 object DirectivesProcessor {
 
   private val processors = Map(
-    "lib" -> (processLib _)
+    "lib" -> (processLib _),
+    "scala" -> (processScala _)
   )
 
   private def processLib(value: Any): BuildOptions = {
@@ -28,9 +29,11 @@ object DirectivesProcessor {
       }
       .getOrElse(Vector.empty)
 
-    BuildOptions(classPathOptions = ClassPathOptions(
-      extraDependencies = extraDependencies
-    ))
+    BuildOptions(
+      classPathOptions = ClassPathOptions(
+        extraDependencies = extraDependencies
+      )
+    )
   }
 
   private def processScala(value: Any): BuildOptions = {
@@ -39,9 +42,15 @@ object DirectivesProcessor {
       .toList
       .collect {
         case list: java.util.List[_] =>
-          list.asScala.collect { case v: String => v }.toList
-        case v: String =>
-          List(v)
+          list
+            .asScala
+            .collect {
+              case v: String => v // needed?
+              case v: StringValue => v.get()
+            }
+            .toList
+        case v: StringValue => List(v.get())
+        case v: String => List(v) // needed?
       }
       .flatten
       .map(_.filter(!_.isSpaceChar))

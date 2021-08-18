@@ -42,16 +42,16 @@ object Package extends ScalaCommand[PackageOptions] {
     val logger = options.shared.logger
 
     if (options.watch.watch) {
-      val watcher = Build.watch(inputs, initialBuildOptions, bloopRifleConfig, logger, postAction = () => WatchUtil.printWatchMessage()) {
-        case s: Build.Successful =>
+      val watcher = Build.watch(inputs, initialBuildOptions, bloopRifleConfig, logger, crossBuilds = false, postAction = () => WatchUtil.printWatchMessage()) {
+        case (s: Build.Successful, _) =>
           doPackage(inputs, logger, options.output.filter(_.nonEmpty), options.force, s)
-        case f: Build.Failed =>
+        case (f: Build.Failed, _) =>
           System.err.println("Compilation failed")
       }
       try WatchUtil.waitForCtrlC()
       finally watcher.dispose()
     } else {
-      val build = Build.build(inputs, initialBuildOptions, bloopRifleConfig, logger)
+      val (build, _) = Build.build(inputs, initialBuildOptions, bloopRifleConfig, logger, crossBuilds = false)
       build match {
         case s: Build.Successful =>
           doPackage(inputs, logger, options.output.filter(_.nonEmpty), options.force, s)

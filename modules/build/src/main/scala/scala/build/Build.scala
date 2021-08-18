@@ -106,14 +106,15 @@ object Build {
     )
   }
 
-  def build(
+  private def build(
     inputs: Inputs,
     options: BuildOptions,
     logger: Logger,
     buildClient: BloopBuildClient,
     bloopServer: bloop.BloopServer,
-    checkOptions: BuildOptions => Unit
-  ): Build = {
+    checkOptions: BuildOptions => Unit,
+    crossBuilds: Boolean
+  ): (Build, Seq[Build]) = {
 
     val sources = Sources.forInputs(
       inputs,
@@ -125,20 +126,30 @@ object Build {
 
     val generatedSources = sources.generateSources(inputs0.generatedSrcRoot)
 
-    buildClient.setProjectParams(options0.projectParams)
-    build(
-      inputs0,
-      sources,
-      inputs0.generatedSrcRoot,
-      generatedSources,
-      options0,
-      logger,
-      buildClient,
-      bloopServer
-    )
+    def doBuild(buildOptions: BuildOptions) = {
+      buildClient.setProjectParams(buildOptions.projectParams)
+      build(
+        inputs0,
+        sources,
+        inputs0.generatedSrcRoot,
+        generatedSources,
+        buildOptions,
+        logger,
+        buildClient,
+        bloopServer
+      )
+    }
+
+    val mainBuild = doBuild(options0)
+
+    val extraBuilds =
+      if (crossBuilds) options0.crossOptions.map(opt => doBuild(opt))
+      else Nil
+
+    (mainBuild, extraBuilds)
   }
 
-  def build(
+  private def build(
     inputs: Inputs,
     sources: Sources,
     generatedSrcRoot0: os.Path,
@@ -172,8 +183,9 @@ object Build {
     threads: BuildThreads,
     bloopConfig: BloopRifleConfig,
     logger: Logger,
-    checkOptions: BuildOptions => Unit
-  ): Build = {
+    checkOptions: BuildOptions => Unit,
+    crossBuilds: Boolean
+  ): (Build, Seq[Build]) = {
 
     val buildClient = BloopBuildClient.create(
       logger,
@@ -196,7 +208,8 @@ object Build {
         logger,
         buildClient,
         bloopServer,
-        checkOptions
+        checkOptions,
+        crossBuilds = crossBuilds
       )
     }
   }
@@ -205,18 +218,20 @@ object Build {
     inputs: Inputs,
     options: BuildOptions,
     bloopConfig: BloopRifleConfig,
-    logger: Logger
-  ): Build =
-    build(inputs, options, BuildThreads.create(), bloopConfig, logger, _ => ())
+    logger: Logger,
+    crossBuilds: Boolean
+  ): (Build, Seq[Build]) =
+    build(inputs, options, BuildThreads.create(), bloopConfig, logger, _ => (), crossBuilds = crossBuilds)
 
   def watch(
     inputs: Inputs,
     options: BuildOptions,
     bloopConfig: BloopRifleConfig,
     logger: Logger,
+    crossBuilds: Boolean,
     postAction: () => Unit = () => (),
     checkOptions: BuildOptions => Unit = _ => ()
-  )(action: Build => Unit): Watcher = {
+  )(action: (Build, Seq[Build]) => Unit): Watcher = {
 
     val buildClient = BloopBuildClient.create(
       logger,
@@ -237,8 +252,8 @@ object Build {
 
     def run() = {
       try {
-        val build0 = build(inputs, options, logger, buildClient, bloopServer, checkOptions)
-        action(build0)
+        val (build0, crossBuilds0) = build(inputs, options, logger, buildClient, bloopServer, checkOptions, crossBuilds = crossBuilds)
+        action(build0, crossBuilds0)
       } catch {
         case NonFatal(e) =>
           Util.printException(e)
@@ -660,7 +675,7 @@ object Build {
           runJmh = build.options.jmhOptions.runJmh.map(_ => false)
         )
       )
-      val jmhBuild = Build.build(jmhInputs, updatedOptions, logger, buildClient, bloopServer, _ => ())
+      val (jmhBuild, _) = Build.build(jmhInputs, updatedOptions, logger, buildClient, bloopServer, _ => (), crossBuilds = false)
       Some(jmhBuild)
     }
     else None

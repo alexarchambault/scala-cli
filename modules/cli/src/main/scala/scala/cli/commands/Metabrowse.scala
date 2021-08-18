@@ -38,7 +38,7 @@ object Metabrowse extends ScalaCommand[MetabrowseOptions] {
       // ???
     }
 
-    val build = Build.build(inputs, options.buildOptions, buildThreads, bloopRifleConfig, logger, onOptions(_))
+    val (build, _) = Build.build(inputs, options.buildOptions, buildThreads, bloopRifleConfig, logger, onOptions(_), crossBuilds = false)
 
     val successfulBuild = build match {
       case f: Build.Failed =>

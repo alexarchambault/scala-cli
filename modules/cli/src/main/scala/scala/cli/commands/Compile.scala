@@ -13,6 +13,12 @@ object Compile extends ScalaCommand[CompileOptions] {
 
     val inputs = options.shared.inputsOrExit(args)
 
+    val cross = options.cross.cross.getOrElse(false)
+    if (options.classPath && cross) {
+      System.err.println(s"Error: cannot specify both --class-path and --cross")
+      sys.exit(1)
+    }
+
     def postBuild(build: Build): Unit =
       if (options.classPath)
         for (s <- build.successfulOpt) {
@@ -24,13 +30,13 @@ object Compile extends ScalaCommand[CompileOptions] {
     val bloopRifleConfig = options.shared.bloopRifleConfig()
 
     if (options.watch.watch) {
-      val watcher = Build.watch(inputs, buildOptions, bloopRifleConfig, options.shared.logger, postAction = () => WatchUtil.printWatchMessage()) { build =>
+      val watcher = Build.watch(inputs, buildOptions, bloopRifleConfig, options.shared.logger, crossBuilds = cross, postAction = () => WatchUtil.printWatchMessage()) { (build, _) =>
         postBuild(build)
       }
       try WatchUtil.waitForCtrlC()
       finally watcher.dispose()
     } else {
-      val build = Build.build(inputs, buildOptions, bloopRifleConfig, options.shared.logger)
+      val (build, _) = Build.build(inputs, buildOptions, bloopRifleConfig, options.shared.logger, crossBuilds = cross)
       postBuild(build)
     }
   }
