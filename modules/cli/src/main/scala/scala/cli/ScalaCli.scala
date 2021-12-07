@@ -116,5 +116,6 @@ object ScalaCli extends CommandsEntryPoint {
         System.err.println(
           "ERROR: " + e.toString() ++ System.lineSeparator() ++ s"For more details, please see '$tempdir'"
         )
+        sys.exit(1)
     }
 }
