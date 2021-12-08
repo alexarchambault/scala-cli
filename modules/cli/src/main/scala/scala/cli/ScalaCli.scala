@@ -74,7 +74,8 @@ object ScalaCli extends CommandsEntryPoint {
     try main0(args)
     catch {
       case e: Throwable =>
-        val dir = os.pwd / ".scala" / "stacktraces"
+        val workspace = CurrentWorkspace.pathOpt.getOrElse(os.pwd)
+        val dir = workspace / ".scala" / "stacktraces"
         os.makeDir.all(dir)
         import java.time.Instant
 
