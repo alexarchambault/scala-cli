@@ -3,6 +3,8 @@ package scala.cli
 import caseapp.core.app.CommandsEntryPoint
 import caseapp.core.help.RuntimeCommandsHelp
 
+import java.io.{ByteArrayOutputStream, PrintStream}
+import java.nio.charset.StandardCharsets
 import java.nio.file.InvalidPathException
 
 import scala.cli.commands._
@@ -70,6 +72,22 @@ object ScalaCli extends CommandsEntryPoint {
     }
   }
 
+  private def printThrowable(t: Throwable, out: PrintStream): Unit =
+    if (t != null) {
+      out.println(t.toString)
+      // FIXME Print t.getSuppressed too?
+      for (l <- t.getStackTrace)
+        out.println(s"  $l")
+      printThrowable(t.getCause, out)
+    }
+
+  private def printThrowable(t: Throwable): Array[Byte] = {
+    val baos = new ByteArrayOutputStream
+    val ps = new PrintStream(baos, true, StandardCharsets.UTF_8)
+    printThrowable(t, ps)
+    baos.toByteArray
+  }
+
   override def main(args: Array[String]): Unit =
     try main0(args)
     catch {
@@ -80,7 +98,7 @@ object ScalaCli extends CommandsEntryPoint {
         import java.time.Instant
 
         val tempdir = os.temp(
-          contents = e.toString() ++ System.lineSeparator() * 2 ++ e.getStackTraceString,
+          contents = printThrowable(e),
           dir = dir,
           prefix = Instant.now().getEpochSecond().toString() + "-",
           suffix = ".log",
