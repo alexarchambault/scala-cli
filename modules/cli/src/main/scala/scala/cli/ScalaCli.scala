@@ -71,35 +71,7 @@ object ScalaCli extends CommandsEntryPoint {
   }
 
   override def main(args: Array[String]): Unit =
-    try {
-
-      if (Properties.isWin && isGraalvmNativeImage)
-        // The DLL loaded by LoadWindowsLibrary is statically linked in
-        // the Scala CLI native image, no need to manually load it.
-        coursier.jniutils.LoadWindowsLibrary.assumeInitialized()
-
-      if (isGraalvmNativeImage)
-        org.scalasbt.ipcsocket.NativeLoader.assumeLoaded()
-
-      if (Properties.isWin && System.console() != null && coursier.paths.Util.useJni())
-        // Enable ANSI output in Windows terminal
-        coursier.jniutils.WindowsAnsiTerminal.enableAnsiOutput()
-
-      // quick hack, until the raw args are kept in caseapp.RemainingArgs by case-app
-      actualDefaultCommand.anyArgs = args.nonEmpty
-
-      commands.foreach {
-        case c: NeedsArgvCommand => c.setArgv(progName +: args)
-        case _                   =>
-      }
-
-      val processedArgs =
-        if (args.lengthCompare(1) > 0 && isShebangFile(args(0)))
-          Array(args(0), "--") ++ args.tail
-        else
-          args
-      super.main(processedArgs)
-    }
+    try main0(args)
     catch {
       case e: Throwable =>
         val dir = os.pwd / ".scala" / "stacktraces"
@@ -118,4 +90,33 @@ object ScalaCli extends CommandsEntryPoint {
         )
         sys.exit(1)
     }
+
+  private def main0(args: Array[String]): Unit = {
+    if (Properties.isWin && isGraalvmNativeImage)
+      // The DLL loaded by LoadWindowsLibrary is statically linked in
+      // the Scala CLI native image, no need to manually load it.
+      coursier.jniutils.LoadWindowsLibrary.assumeInitialized()
+
+    if (isGraalvmNativeImage)
+      org.scalasbt.ipcsocket.NativeLoader.assumeLoaded()
+
+    if (Properties.isWin && System.console() != null && coursier.paths.Util.useJni())
+      // Enable ANSI output in Windows terminal
+      coursier.jniutils.WindowsAnsiTerminal.enableAnsiOutput()
+
+    // quick hack, until the raw args are kept in caseapp.RemainingArgs by case-app
+    actualDefaultCommand.anyArgs = args.nonEmpty
+
+    commands.foreach {
+      case c: NeedsArgvCommand => c.setArgv(progName +: args)
+      case _                   =>
+    }
+
+    val processedArgs =
+      if (args.lengthCompare(1) > 0 && isShebangFile(args(0)))
+        Array(args(0), "--") ++ args.tail
+      else
+        args
+    super.main(processedArgs)
+  }
 }
