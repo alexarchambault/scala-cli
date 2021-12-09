@@ -83,7 +83,7 @@ object ScalaCli extends CommandsEntryPoint {
 
   private def printThrowable(t: Throwable): Array[Byte] = {
     val baos = new ByteArrayOutputStream
-    val ps = new PrintStream(baos, true, StandardCharsets.UTF_8)
+    val ps   = new PrintStream(baos, true, StandardCharsets.UTF_8)
     printThrowable(t, ps)
     baos.toByteArray
   }
@@ -93,7 +93,7 @@ object ScalaCli extends CommandsEntryPoint {
     catch {
       case e: Throwable =>
         val workspace = CurrentParams.workspaceOpt.getOrElse(os.pwd)
-        val dir = workspace / ".scala" / "stacktraces"
+        val dir       = workspace / ".scala" / "stacktraces"
         os.makeDir.all(dir)
         import java.time.Instant
 
