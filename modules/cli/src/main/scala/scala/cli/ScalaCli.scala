@@ -97,16 +97,15 @@ object ScalaCli extends CommandsEntryPoint {
         os.makeDir.all(dir)
         import java.time.Instant
 
-        val tempdir = os.temp(
+        val tempFile = os.temp(
           contents = printThrowable(e),
           dir = dir,
           prefix = Instant.now().getEpochSecond().toString() + "-",
           suffix = ".log",
           deleteOnExit = false
         )
-        System.err.println(
-          "ERROR: " + e.toString() ++ System.lineSeparator() ++ s"For more details, please see '$tempdir'"
-        )
+        System.err.println(s"Error: $e")
+        System.err.println(s"For more details, please see '$tempFile'")
         sys.exit(1)
     }
 
