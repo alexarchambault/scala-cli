@@ -8,7 +8,7 @@ import scala.build.errors.BuildException
 import scala.build.internal.{Constants, Runner}
 import scala.build.options.Platform
 import scala.build.{Build, Inputs, Logger}
-import scala.cli.CurrentWorkspace
+import scala.cli.CurrentParams
 import scala.scalanative.{build => sn}
 import scala.util.Properties
 
@@ -31,8 +31,9 @@ object Run extends ScalaCommand[RunOptions] {
     programArgs: Seq[String],
     defaultInputs: () => Option[Inputs]
   ): Unit = {
+    CurrentParams.verbosity = options.shared.logging.verbosity
     val inputs = options.shared.inputsOrExit(inputArgs, defaultInputs = defaultInputs)
-    CurrentWorkspace.pathOpt = Some(inputs.workspace)
+    CurrentParams.workspaceOpt = Some(inputs.workspace)
 
     val initialBuildOptions = options.buildOptions
     val bloopRifleConfig    = options.shared.bloopRifleConfig()

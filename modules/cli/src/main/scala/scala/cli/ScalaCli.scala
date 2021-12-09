@@ -92,7 +92,7 @@ object ScalaCli extends CommandsEntryPoint {
     try main0(args)
     catch {
       case e: Throwable =>
-        val workspace = CurrentWorkspace.pathOpt.getOrElse(os.pwd)
+        val workspace = CurrentParams.workspaceOpt.getOrElse(os.pwd)
         val dir = workspace / ".scala" / "stacktraces"
         os.makeDir.all(dir)
         import java.time.Instant
@@ -104,9 +104,14 @@ object ScalaCli extends CommandsEntryPoint {
           suffix = ".log",
           deleteOnExit = false
         )
-        System.err.println(s"Error: $e")
-        System.err.println(s"For more details, please see '$tempFile'")
-        sys.exit(1)
+
+        if (CurrentParams.verbosity >= 2)
+          throw e
+        else {
+          System.err.println(s"Error: $e")
+          System.err.println(s"For more details, please see '$tempFile'")
+          sys.exit(1)
+        }
     }
 
   private def main0(args: Array[String]): Unit = {
