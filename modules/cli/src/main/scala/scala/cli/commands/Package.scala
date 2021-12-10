@@ -28,13 +28,15 @@ import scala.cli.internal.{GetImageResizer, ScalaJsLinker}
 import scala.scalanative.util.Scope
 import scala.scalanative.{build => sn}
 import scala.util.Properties
+import scala.cli.CurrentParams
 
 object Package extends ScalaCommand[PackageOptions] {
   override def group                                  = "Main"
   override def sharedOptions(options: PackageOptions) = Some(options.shared)
   def run(options: PackageOptions, args: RemainingArgs): Unit = {
-
+    CurrentParams.verbosity = options.shared.logging.verbosity
     val inputs = options.shared.inputsOrExit(args)
+    CurrentParams.workspaceOpt = Some(inputs.workspace)
 
     // FIXME mainClass encoding has issues with special chars, such as '-'
 

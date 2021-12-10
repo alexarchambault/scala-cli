@@ -5,6 +5,7 @@ import coursier.env.{EnvironmentUpdate, ProfileUpdater}
 
 import scala.io.StdIn.readLine
 import scala.util.{Properties, Try}
+import scala.cli.CurrentParams
 
 object InstallHome extends ScalaCommand[InstallHomeOptions] {
   override def hidden: Boolean = true
@@ -41,7 +42,7 @@ object InstallHome extends ScalaCommand[InstallHomeOptions] {
     }
 
   def run(options: InstallHomeOptions, args: RemainingArgs): Unit = {
-
+    CurrentParams.verbosity = options.shared.logging.verbosity
     val binDirPath =
       options.binDirPath.getOrElse(scala.build.Directories.default().binRepoDir / "scala-cli")
     val destBinPath = binDirPath / options.binaryName

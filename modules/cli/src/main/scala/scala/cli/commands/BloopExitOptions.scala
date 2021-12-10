@@ -7,11 +7,13 @@ import scala.build.blooprifle.BloopRifleConfig
 // format: off
 final case class BloopExitOptions(
   @Recurse
+    shared: SharedOptions = SharedOptions(),
+  @Recurse
     logging: LoggingOptions = LoggingOptions(),
   @Recurse
     compilationServer: SharedCompilationServerOptions = SharedCompilationServerOptions(),
   @Recurse
-    directories: SharedDirectoriesOptions = SharedDirectoriesOptions()
+    directories: SharedDirectoriesOptions = SharedDirectoriesOptions(),
 ) {
   // format: on
 

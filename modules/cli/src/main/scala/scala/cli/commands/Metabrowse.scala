@@ -8,6 +8,7 @@ import java.nio.file.Path
 import scala.build.internal.Runner
 import scala.build.{Build, Logger}
 import scala.cli.internal.FetchExternalBinary
+import scala.cli.CurrentParams
 
 object Metabrowse extends ScalaCommand[MetabrowseOptions] {
   override def group = "Miscellaneous"
@@ -19,8 +20,9 @@ object Metabrowse extends ScalaCommand[MetabrowseOptions] {
   override def sharedOptions(options: MetabrowseOptions) = Some(options.shared)
 
   def run(options: MetabrowseOptions, args: RemainingArgs): Unit = {
-
+    CurrentParams.verbosity = options.shared.logging.verbosity
     val inputs = options.shared.inputsOrExit(args)
+    CurrentParams.verbosity = options.shared.logging.verbosity
 
     val logger = options.shared.logger
 

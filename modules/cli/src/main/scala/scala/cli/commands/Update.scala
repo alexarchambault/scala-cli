@@ -5,6 +5,7 @@ import caseapp._
 import scala.build.Logger
 import scala.io.StdIn.readLine
 import scala.util.{Failure, Properties, Success, Try}
+import scala.cli.CurrentParams
 
 object Update extends ScalaCommand[UpdateOptions] {
 
@@ -73,7 +74,7 @@ object Update extends ScalaCommand[UpdateOptions] {
       else println("ScalaCLI is up-to-date")
     else if (isOutdated)
       println(
-        s"""Your ScalaCLI $currentVersion is outdated, please update ScalaCLI to $newestScalaCliVersion 
+        s"""Your ScalaCLI $currentVersion is outdated, please update ScalaCLI to $newestScalaCliVersion
            |Run 'curl -sSLf https://virtuslab.github.io/scala-cli-packages/scala-setup.sh | sh' to update ScalaCLI.""".stripMargin
       )
   }
@@ -107,8 +108,10 @@ object Update extends ScalaCommand[UpdateOptions] {
     else update(options, scalaCliBinPath)
   }
 
-  def run(options: UpdateOptions, args: RemainingArgs): Unit =
+  def run(options: UpdateOptions, args: RemainingArgs): Unit = {
+    CurrentParams.verbosity = options.shared.logging.verbosity
     checkUpdate(options)
+  }
 
   def checkUpdateSafe(logger: Logger): Unit = {
     Try {

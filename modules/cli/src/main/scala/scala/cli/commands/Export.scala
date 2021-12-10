@@ -10,6 +10,7 @@ import scala.build.internal.CustomCodeWrapper
 import scala.build.options.{BuildOptions, Scope}
 import scala.build.{CrossSources, Inputs, Logger, Os, Sources}
 import scala.cli.export._
+import scala.cli.CurrentParams
 
 object Export extends ScalaCommand[ExportOptions] {
 
@@ -68,9 +69,10 @@ object Export extends ScalaCommand[ExportOptions] {
   }
 
   def run(options: ExportOptions, args: RemainingArgs): Unit = {
-
-    val logger      = options.shared.logger
-    val inputs      = options.shared.inputsOrExit(args)
+    CurrentParams.verbosity = options.shared.logging.verbosity
+    val logger = options.shared.logger
+    val inputs = options.shared.inputsOrExit(args)
+    CurrentParams.workspaceOpt = Some(inputs.workspace)
     val baseOptions = options.buildOptions
 
     val (sources, options0) =

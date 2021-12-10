@@ -8,6 +8,8 @@ import scala.build.options.{BuildOptions, InternalOptions}
 // format: off
 final case class BloopStartOptions(
   @Recurse
+    shared: SharedOptions = SharedOptions(),
+  @Recurse
     logging: LoggingOptions = LoggingOptions(),
   @Recurse
     compilationServer: SharedCompilationServerOptions = SharedCompilationServerOptions(),
@@ -17,7 +19,6 @@ final case class BloopStartOptions(
     jvm: SharedJvmOptions = SharedJvmOptions(),
   @Recurse
     coursier: CoursierOptions = CoursierOptions(),
-
   @Name("f")
     force: Boolean = false
 ) {
@@ -42,6 +43,7 @@ final case class BloopStartOptions(
 }
 
 object BloopStartOptions {
+
   implicit lazy val parser: Parser[BloopStartOptions] = Parser.derive
   implicit lazy val help: Help[BloopStartOptions]     = Help.derive
 }

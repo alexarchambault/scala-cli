@@ -17,7 +17,9 @@ final case class UpdateOptions(
   @HelpMessage("Force update scala-cli if is outdated")
     force: Boolean = false,
   @Hidden
-    isInternalRun: Boolean = false
+    isInternalRun: Boolean = false,
+  @Recurse
+    shared: SharedOptions = SharedOptions()
 ) {
   // format: on
   lazy val binDirPath = binDir.map(os.Path(_, os.pwd))

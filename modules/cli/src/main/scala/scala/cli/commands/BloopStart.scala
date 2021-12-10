@@ -8,6 +8,7 @@ import scala.build.blooprifle.BloopRifle
 import scala.build.blooprifle.internal.Constants
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+import scala.cli.CurrentParams
 
 object BloopStart extends ScalaCommand[BloopStartOptions] {
   override def hidden = true
@@ -15,6 +16,7 @@ object BloopStart extends ScalaCommand[BloopStartOptions] {
     List("bloop", "start")
   )
   def run(options: BloopStartOptions, args: RemainingArgs): Unit = {
+    CurrentParams.verbosity = options.shared.logging.verbosity
     val threads          = BloopThreads.create()
     val bloopRifleConfig = options.bloopRifleConfig()
     val logger           = options.logging.logger

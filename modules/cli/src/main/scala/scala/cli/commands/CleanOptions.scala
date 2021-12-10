@@ -6,11 +6,13 @@ import caseapp._
 @HelpMessage("Clean the workspace")
 final case class CleanOptions(
   @Recurse
+    shared: SharedOptions = SharedOptions(),
+  @Recurse
     logging: LoggingOptions = LoggingOptions(),
   @Recurse
     directories: SharedDirectoriesOptions = SharedDirectoriesOptions(),
   @Recurse
-    bspFile: SharedBspFileOptions = SharedBspFileOptions()
+    bspFile: SharedBspFileOptions = SharedBspFileOptions(),
 )
 // format: on
 
