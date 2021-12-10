@@ -8,7 +8,7 @@ sidebar_position: 3
 Print details about this application
 
 Accepts options:
-- [logging](./cli-options.md#logging-options)
+- [verbosity](./cli-options.md#verbosity-options)
 
 ## `bsp`
 
@@ -26,6 +26,7 @@ Accepts options:
 - [Scala Native](./cli-options.md#scala-native-options)
 - [scalac](./cli-options.md#scalac-options)
 - [shared](./cli-options.md#shared-options)
+- [verbosity](./cli-options.md#verbosity-options)
 
 ## `clean`
 
@@ -35,6 +36,7 @@ Accepts options:
 - [bsp file](./cli-options.md#bsp-file-options)
 - [directories](./cli-options.md#directories-options)
 - [logging](./cli-options.md#logging-options)
+- [verbosity](./cli-options.md#verbosity-options)
 
 ## `compile`
 
@@ -53,6 +55,7 @@ Accepts options:
 - [Scala Native](./cli-options.md#scala-native-options)
 - [scalac](./cli-options.md#scalac-options)
 - [shared](./cli-options.md#shared-options)
+- [verbosity](./cli-options.md#verbosity-options)
 - [watch](./cli-options.md#watch-options)
 
 ## `export`
@@ -72,6 +75,7 @@ Accepts options:
 - [Scala Native](./cli-options.md#scala-native-options)
 - [scalac](./cli-options.md#scalac-options)
 - [shared](./cli-options.md#shared-options)
+- [verbosity](./cli-options.md#verbosity-options)
 
 ## `fmt`
 
@@ -93,6 +97,7 @@ Accepts options:
 - [Scala Native](./cli-options.md#scala-native-options)
 - [scalac](./cli-options.md#scalac-options)
 - [shared](./cli-options.md#shared-options)
+- [verbosity](./cli-options.md#verbosity-options)
 
 ## `help`
 
@@ -109,6 +114,7 @@ Accepts options:
 - [directories](./cli-options.md#directories-options)
 - [install completions](./cli-options.md#install-completions-options)
 - [logging](./cli-options.md#logging-options)
+- [verbosity](./cli-options.md#verbosity-options)
 
 ## `browse`
 
@@ -129,6 +135,7 @@ Accepts options:
 - [Scala Native](./cli-options.md#scala-native-options)
 - [scalac](./cli-options.md#scalac-options)
 - [shared](./cli-options.md#shared-options)
+- [verbosity](./cli-options.md#verbosity-options)
 
 ## `console`
 
@@ -151,6 +158,7 @@ Accepts options:
 - [Scala Native](./cli-options.md#scala-native-options)
 - [scalac](./cli-options.md#scalac-options)
 - [shared](./cli-options.md#shared-options)
+- [verbosity](./cli-options.md#verbosity-options)
 - [watch](./cli-options.md#watch-options)
 
 ## `package`
@@ -172,6 +180,7 @@ Accepts options:
 - [Scala Native](./cli-options.md#scala-native-options)
 - [scalac](./cli-options.md#scalac-options)
 - [shared](./cli-options.md#shared-options)
+- [verbosity](./cli-options.md#verbosity-options)
 - [watch](./cli-options.md#watch-options)
 
 ## `run`
@@ -199,6 +208,7 @@ Accepts options:
 - [Scala Native](./cli-options.md#scala-native-options)
 - [scalac](./cli-options.md#scalac-options)
 - [shared](./cli-options.md#shared-options)
+- [verbosity](./cli-options.md#verbosity-options)
 - [watch](./cli-options.md#watch-options)
 
 ## `setup-ide`
@@ -218,6 +228,7 @@ Accepts options:
 - [scalac](./cli-options.md#scalac-options)
 - [setup IDE](./cli-options.md#setup-ide-options)
 - [shared](./cli-options.md#shared-options)
+- [verbosity](./cli-options.md#verbosity-options)
 
 ## `shebang`
 
@@ -260,6 +271,7 @@ Accepts options:
 - [Scala Native](./cli-options.md#scala-native-options)
 - [scalac](./cli-options.md#scalac-options)
 - [shared](./cli-options.md#shared-options)
+- [verbosity](./cli-options.md#verbosity-options)
 - [watch](./cli-options.md#watch-options)
 
 ## `test`
@@ -280,6 +292,7 @@ Accepts options:
 - [scalac](./cli-options.md#scalac-options)
 - [shared](./cli-options.md#shared-options)
 - [test](./cli-options.md#test-options)
+- [verbosity](./cli-options.md#verbosity-options)
 - [watch](./cli-options.md#watch-options)
 
 ## `update`
@@ -287,15 +300,15 @@ Accepts options:
 Update scala-cli - it works only for installation script
 
 Accepts options:
-- [logging](./cli-options.md#logging-options)
 - [update](./cli-options.md#update-options)
+- [verbosity](./cli-options.md#verbosity-options)
 
 ## `version`
 
 Print `scala-cli` version
 
 Accepts options:
-- [logging](./cli-options.md#logging-options)
+- [verbosity](./cli-options.md#verbosity-options)
 
 ## Hidden commands
 
@@ -303,6 +316,7 @@ Accepts options:
 
 Accepts options:
 - [add path](./cli-options.md#add-path-options)
+- [verbosity](./cli-options.md#verbosity-options)
 
 ### `bloop exit`
 
@@ -310,6 +324,7 @@ Accepts options:
 - [compilation server](./cli-options.md#compilation-server-options)
 - [directories](./cli-options.md#directories-options)
 - [logging](./cli-options.md#logging-options)
+- [verbosity](./cli-options.md#verbosity-options)
 
 ### `bloop start`
 
@@ -320,6 +335,7 @@ Accepts options:
 - [directories](./cli-options.md#directories-options)
 - [jvm](./cli-options.md#jvm-options)
 - [logging](./cli-options.md#logging-options)
+- [verbosity](./cli-options.md#verbosity-options)
 
 ### `directories`
 
@@ -327,7 +343,7 @@ Prints directories used by `scala-cli`
 
 Accepts options:
 - [directories](./cli-options.md#directories-options)
-- [logging](./cli-options.md#logging-options)
+- [verbosity](./cli-options.md#verbosity-options)
 
 ### `install-home`
 
@@ -345,4 +361,5 @@ Accepts options:
 - [Scala Native](./cli-options.md#scala-native-options)
 - [scalac](./cli-options.md#scalac-options)
 - [shared](./cli-options.md#shared-options)
+- [verbosity](./cli-options.md#verbosity-options)
 

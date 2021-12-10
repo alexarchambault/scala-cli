@@ -6,9 +6,9 @@ import caseapp._
 @HelpMessage("Prints directories used by `scala-cli`")
 final case class DirectoriesOptions(
   @Recurse
-    logging: LoggingOptions = LoggingOptions(),
+    directories: SharedDirectoriesOptions = SharedDirectoriesOptions(),
   @Recurse
-    directories: SharedDirectoriesOptions = SharedDirectoriesOptions()
+    verbosity: VerbosityOptions = VerbosityOptions()
 )
 // format: on
 

@@ -8,7 +8,7 @@ object Directories extends ScalaCommand[DirectoriesOptions] {
   override def hidden: Boolean = true
 
   def run(options: DirectoriesOptions, args: RemainingArgs): Unit = {
-    CurrentParams.verbosity = options.logging.verbosity
+    CurrentParams.verbosity = options.verbosity.verbosity
     if (args.all.nonEmpty) {
       System.err.println("The directories command doesn't accept arguments.")
       sys.exit(1)
