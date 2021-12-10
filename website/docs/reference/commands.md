@@ -7,6 +7,9 @@ sidebar_position: 3
 
 Print details about this application
 
+Accepts options:
+- [logging](./cli-options.md#logging-options)
+
 ## `bsp`
 
 Start BSP server
@@ -284,11 +287,15 @@ Accepts options:
 Update scala-cli - it works only for installation script
 
 Accepts options:
+- [logging](./cli-options.md#logging-options)
 - [update](./cli-options.md#update-options)
 
 ## `version`
 
 Print `scala-cli` version
+
+Accepts options:
+- [logging](./cli-options.md#logging-options)
 
 ## Hidden commands
 
@@ -320,11 +327,22 @@ Prints directories used by `scala-cli`
 
 Accepts options:
 - [directories](./cli-options.md#directories-options)
+- [logging](./cli-options.md#logging-options)
 
 ### `install-home`
 
 Install `scala-cli` in a sub-directory of the home directory
 
 Accepts options:
+- [compilation server](./cli-options.md#compilation-server-options)
+- [coursier](./cli-options.md#coursier-options)
+- [dependency](./cli-options.md#dependency-options)
+- [directories](./cli-options.md#directories-options)
 - [install home](./cli-options.md#install-home-options)
+- [jvm](./cli-options.md#jvm-options)
+- [logging](./cli-options.md#logging-options)
+- [Scala.JS](./cli-options.md#scalajs-options)
+- [Scala Native](./cli-options.md#scala-native-options)
+- [scalac](./cli-options.md#scalac-options)
+- [shared](./cli-options.md#shared-options)
 
