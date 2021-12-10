@@ -4,8 +4,6 @@ import caseapp._
 
 // format: off
 final case class AddPathOptions(
-  @Recurse
-    shared: SharedOptions = SharedOptions(),
   @Name("q")
     quiet: Boolean = false,
   title: String = ""

@@ -5,7 +5,7 @@ import caseapp._
 @HelpMessage("Print details about this application")
 final case class AboutOptions(
   @Recurse
-    shared: SharedOptions = SharedOptions()
+    logging: LoggingOptions = LoggingOptions()
 )
 
 object AboutOptions {

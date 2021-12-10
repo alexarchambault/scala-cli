@@ -16,7 +16,7 @@ object BloopStart extends ScalaCommand[BloopStartOptions] {
     List("bloop", "start")
   )
   def run(options: BloopStartOptions, args: RemainingArgs): Unit = {
-    CurrentParams.verbosity = options.shared.logging.verbosity
+    CurrentParams.verbosity = options.logging.verbosity
     val threads          = BloopThreads.create()
     val bloopRifleConfig = options.bloopRifleConfig()
     val logger           = options.logging.logger

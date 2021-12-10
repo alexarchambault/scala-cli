@@ -5,7 +5,7 @@ import caseapp._
 @HelpMessage("Print `scala-cli` version")
 final case class VersionOptions(
   @Recurse
-  shared: SharedOptions = SharedOptions()
+  logging: LoggingOptions = LoggingOptions()
 )
 
 object VersionOptions {

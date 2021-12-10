@@ -8,7 +8,7 @@ import scala.cli.CurrentParams
 object Version extends ScalaCommand[VersionOptions] {
   override def group = "Miscellaneous"
   def run(options: VersionOptions, args: RemainingArgs): Unit = {
-    CurrentParams.verbosity = options.shared.logging.verbosity
+    CurrentParams.verbosity = options.logging.verbosity
     println(Constants.version)
   }
 }

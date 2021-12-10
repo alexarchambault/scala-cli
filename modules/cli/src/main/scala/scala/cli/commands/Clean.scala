@@ -8,7 +8,7 @@ import scala.cli.CurrentParams
 object Clean extends ScalaCommand[CleanOptions] {
   override def group = "Main"
   def run(options: CleanOptions, args: RemainingArgs): Unit = {
-    CurrentParams.verbosity = options.shared.logging.verbosity
+    CurrentParams.verbosity = options.logging.verbosity
     val inputs = Inputs(
       args.all,
       Os.pwd,

@@ -19,7 +19,7 @@ final case class UpdateOptions(
   @Hidden
     isInternalRun: Boolean = false,
   @Recurse
-    shared: SharedOptions = SharedOptions()
+    logging: LoggingOptions = LoggingOptions()
 ) {
   // format: on
   lazy val binDirPath = binDir.map(os.Path(_, os.pwd))

@@ -109,7 +109,7 @@ object Update extends ScalaCommand[UpdateOptions] {
   }
 
   def run(options: UpdateOptions, args: RemainingArgs): Unit = {
-    CurrentParams.verbosity = options.shared.logging.verbosity
+    CurrentParams.verbosity = options.logging.verbosity
     checkUpdate(options)
   }
 

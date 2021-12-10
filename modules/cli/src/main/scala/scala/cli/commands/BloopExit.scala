@@ -13,7 +13,7 @@ object BloopExit extends ScalaCommand[BloopExitOptions] {
     List("bloop", "exit")
   )
   def run(options: BloopExitOptions, args: RemainingArgs): Unit = {
-    CurrentParams.verbosity = options.shared.logging.verbosity
+    CurrentParams.verbosity = options.logging.verbosity
     val threads          = BloopThreads.create()
     val bloopRifleConfig = options.bloopRifleConfig
     val logger           = options.logging.logger

@@ -31,8 +31,6 @@ final case class InstallCompletionsOptions(
 
   @HelpMessage("Print completions to stdout")
     env: Boolean = false,
-  @Recurse
-    shared: SharedOptions = SharedOptions()
 )
 // format: on
 

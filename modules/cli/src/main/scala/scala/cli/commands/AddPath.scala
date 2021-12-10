@@ -11,7 +11,7 @@ import scala.util.Properties
 object AddPath extends ScalaCommand[AddPathOptions] {
   override def hidden = true
   def run(options: AddPathOptions, args: RemainingArgs): Unit = {
-    CurrentParams.verbosity = options.shared.logging.verbosity
+    CurrentParams.verbosity = if (options.quiet) 0 else 1
 
     if (args.all.isEmpty) {
       if (!options.quiet)

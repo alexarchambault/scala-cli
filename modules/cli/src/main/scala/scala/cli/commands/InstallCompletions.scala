@@ -17,7 +17,7 @@ object InstallCompletions extends ScalaCommand[InstallCompletionsOptions] {
   )
   private lazy val home = os.Path(sys.props("user.home"), os.pwd)
   def run(options: InstallCompletionsOptions, args: RemainingArgs): Unit = {
-    CurrentParams.verbosity = options.shared.logging.verbosity
+    CurrentParams.verbosity = options.logging.verbosity
 
     lazy val completionsDir =
       options.output

@@ -8,8 +8,6 @@ import scala.build.options.{BuildOptions, InternalOptions}
 // format: off
 final case class BloopStartOptions(
   @Recurse
-    shared: SharedOptions = SharedOptions(),
-  @Recurse
     logging: LoggingOptions = LoggingOptions(),
   @Recurse
     compilationServer: SharedCompilationServerOptions = SharedCompilationServerOptions(),
