@@ -7,8 +7,8 @@ import java.io.File
 import java.nio.charset.Charset
 import java.util.Arrays
 
-import scala.cli.internal.{Argv0, ProfileFileUpdater}
 import scala.cli.CurrentParams
+import scala.cli.internal.{Argv0, ProfileFileUpdater}
 
 object InstallCompletions extends ScalaCommand[InstallCompletionsOptions] {
   override def names = List(

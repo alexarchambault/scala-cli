@@ -1,6 +1,7 @@
 package scala.cli.commands
 
 import caseapp._
+
 import scala.cli.CurrentParams
 
 object Directories extends ScalaCommand[DirectoriesOptions] {

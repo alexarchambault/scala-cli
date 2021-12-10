@@ -4,8 +4,8 @@ import caseapp._
 
 import scala.build.internal.{CustomCodeWrapper, Runner}
 import scala.build.{CrossSources, Inputs, Sources}
-import scala.cli.internal.FetchExternalBinary
 import scala.cli.CurrentParams
+import scala.cli.internal.FetchExternalBinary
 
 object Fmt extends ScalaCommand[FmtOptions] {
   override def group                              = "Miscellaneous"

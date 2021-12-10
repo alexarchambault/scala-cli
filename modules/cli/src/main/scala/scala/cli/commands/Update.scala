@@ -3,9 +3,9 @@ package scala.cli.commands
 import caseapp._
 
 import scala.build.Logger
+import scala.cli.CurrentParams
 import scala.io.StdIn.readLine
 import scala.util.{Failure, Properties, Success, Try}
-import scala.cli.CurrentParams
 
 object Update extends ScalaCommand[UpdateOptions] {
 

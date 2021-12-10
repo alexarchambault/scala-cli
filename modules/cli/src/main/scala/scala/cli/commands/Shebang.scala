@@ -1,6 +1,7 @@
 package scala.cli.commands
 
 import caseapp.RemainingArgs
+
 import scala.cli.CurrentParams
 
 object Shebang extends ScalaCommand[ShebangOptions] {

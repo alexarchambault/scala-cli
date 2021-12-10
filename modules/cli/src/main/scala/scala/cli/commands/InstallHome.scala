@@ -3,9 +3,9 @@ package scala.cli.commands
 import caseapp._
 import coursier.env.{EnvironmentUpdate, ProfileUpdater}
 
+import scala.cli.CurrentParams
 import scala.io.StdIn.readLine
 import scala.util.{Properties, Try}
-import scala.cli.CurrentParams
 
 object InstallHome extends ScalaCommand[InstallHomeOptions] {
   override def hidden: Boolean = true

@@ -7,8 +7,8 @@ import scala.build.errors.BuildException
 import scala.build.internal.Runner
 import scala.build.options.BuildOptions
 import scala.build.{Artifacts, Build, Inputs, Logger, Os, ReplArtifacts}
-import scala.util.Properties
 import scala.cli.CurrentParams
+import scala.util.Properties
 
 object Repl extends ScalaCommand[ReplOptions] {
   override def group = "Main"

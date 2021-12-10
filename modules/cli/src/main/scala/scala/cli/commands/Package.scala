@@ -23,12 +23,12 @@ import scala.build.errors.BuildException
 import scala.build.internal.{NativeBuilderHelper, ScalaJsConfig}
 import scala.build.options.{PackageType, Platform}
 import scala.build.{Build, Inputs, Logger, Os}
+import scala.cli.CurrentParams
 import scala.cli.commands.OptionsHelper._
 import scala.cli.internal.{GetImageResizer, ScalaJsLinker}
 import scala.scalanative.util.Scope
 import scala.scalanative.{build => sn}
 import scala.util.Properties
-import scala.cli.CurrentParams
 
 object Package extends ScalaCommand[PackageOptions] {
   override def group                                  = "Main"

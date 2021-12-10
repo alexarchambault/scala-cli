@@ -6,9 +6,9 @@ import upickle.default._
 import scala.build.Build
 import scala.build.bsp.BspThreads
 import scala.build.options.BuildOptions
+import scala.cli.CurrentParams
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
-import scala.cli.CurrentParams
 
 object Bsp extends ScalaCommand[BspOptions] {
   def run(options: BspOptions, args: RemainingArgs): Unit = {

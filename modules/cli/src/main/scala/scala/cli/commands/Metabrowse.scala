@@ -7,8 +7,8 @@ import java.nio.file.Path
 
 import scala.build.internal.Runner
 import scala.build.{Build, Logger}
-import scala.cli.internal.FetchExternalBinary
 import scala.cli.CurrentParams
+import scala.cli.internal.FetchExternalBinary
 
 object Metabrowse extends ScalaCommand[MetabrowseOptions] {
   override def group = "Miscellaneous"
