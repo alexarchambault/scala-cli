@@ -89,7 +89,7 @@ class BloopTests extends munit.FunSuite {
         "--bloop-global-options-file",
         (root / "bloop.json").toString()
       )
-        .call(cwd = root, stderr = os.Pipe, check = false)
+        .call(cwd = root, check = false)
       expect(res.exitCode == 1)
       expect(res.err.text().contains("Server didn't start") || res.err.text().contains(
         "java.lang.OutOfMemoryError: Garbage-collected heap size exceeded"
