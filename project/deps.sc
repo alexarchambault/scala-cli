@@ -43,7 +43,7 @@ object Deps {
   }
   def ammonite          = ivy"com.lihaoyi:::ammonite:2.4.0-23-76673f7f"
   def asm               = ivy"org.ow2.asm:asm:9.2"
-  def bloopConfig       = ivy"io.github.alexarchambault.bleep::bloop-config:1.4.15"
+  def bloopConfig       = ivy"io.github.alexarchambault.bleep::bloop-config:1.4.16-1-0-59238ef8-20211217-0014-SNAPSHOT"
   def bsp4j             = ivy"ch.epfl.scala:bsp4j:2.0.0"
   def caseApp           = ivy"com.github.alexarchambault::case-app:2.1.0-M12"
   def collectionCompat  = ivy"org.scala-lang.modules::scala-collection-compat:2.6.0"
@@ -53,7 +53,7 @@ object Deps {
   def dependency        = ivy"io.get-coursier::dependency:0.2.0"
   def expecty           = ivy"com.eed3si9n.expecty::expecty:0.15.4"
   def guava             = ivy"com.google.guava:guava:31.0.1-jre"
-  def ipcSocket         = ivy"com.github.alexarchambault.tmp.ipcsocket:ipcsocket:1.4.1-aa-4"
+  def ipcSocket         = ivy"io.github.alexarchambault.tmp.ipcsocket:ipcsocket:1.4.1-aa-5-1"
   def jimfs             = ivy"com.google.jimfs:jimfs:1.2"
   def jniUtils          = ivy"io.get-coursier.jniutils:windows-jni-utils:0.3.2"
   def libdaemonjvm      = ivy"io.github.alexarchambault.libdaemon::libdaemon:0.0.7"

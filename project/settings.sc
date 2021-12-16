@@ -239,7 +239,7 @@ trait CliLaunchers extends SbtModule { self =>
         cs,
         "fetch",
         "--intransitive",
-        s"com.github.alexarchambault.tmp.ipcsocket:ipcsocket:$ipcsocketVersion,classifier=x86_64-pc-win32,ext=lib,type=lib",
+        s"io.github.alexarchambault.tmp.ipcsocket:ipcsocket:$ipcsocketVersion,classifier=x86_64-pc-win32,ext=lib,type=lib",
         "-A",
         "lib"
       ).call()
@@ -252,7 +252,7 @@ trait CliLaunchers extends SbtModule { self =>
         cs,
         "fetch",
         "--intransitive",
-        s"com.github.alexarchambault.tmp.ipcsocket:ipcsocket:$ipcsocketVersion,classifier=x86_64-apple-darwin,ext=a,type=a",
+        s"io.github.alexarchambault.tmp.ipcsocket:ipcsocket:$ipcsocketVersion,classifier=x86_64-apple-darwin,ext=a,type=a",
         "-A",
         "a"
       ).call()
@@ -265,7 +265,7 @@ trait CliLaunchers extends SbtModule { self =>
         cs,
         "fetch",
         "--intransitive",
-        s"com.github.alexarchambault.tmp.ipcsocket:ipcsocket:$ipcsocketVersion,classifier=x86_64-pc-linux,ext=a,type=a",
+        s"io.github.alexarchambault.tmp.ipcsocket:ipcsocket:$ipcsocketVersion,classifier=x86_64-pc-linux,ext=a,type=a",
         "-A",
         "a"
       ).call()
