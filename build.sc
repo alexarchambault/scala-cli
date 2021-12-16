@@ -382,11 +382,25 @@ trait CliIntegrationBase extends SbtModule with ScalaCliPublishModule with HasTe
       Deps.scalaAsync,
       Deps.upickle
     )
-    def forkEnv = super.forkEnv() ++ Seq(
-      "SCALA_CLI"      -> testLauncher().path.toString,
-      "SCALA_CLI_KIND" -> cliKind(),
-      "SCALA_CLI_TMP"  -> tmpDirBase().path.toString
-    )
+    def forkEnv = T {
+      val extra =
+        if (Properties.isWin) {
+          val baseDir = os.pwd / "out" / "cs-stuff"
+          Seq(
+            "COURSIER_JVM_CACHE"  -> (baseDir / "jvm-cache").toString,
+            "COURSIER_CACHE"      -> (baseDir / "cache").toString,
+            "COURSIER_CONFIG_DIR" -> (baseDir / "config").toString,
+            "BLOOP_DAEMON_DIR"    -> (baseDir / "bloop").toString
+          )
+        }
+        else
+          Nil
+      super.forkEnv() ++ extra ++ Seq(
+        "SCALA_CLI"      -> testLauncher().path.toString,
+        "SCALA_CLI_KIND" -> cliKind(),
+        "SCALA_CLI_TMP"  -> tmpDirBase().path.toString
+      )
+    }
     def sources = T.sources {
       val name = mainArtifactName().stripPrefix(prefix)
       super.sources().flatMap { ref =>
