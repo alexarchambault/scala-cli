@@ -109,6 +109,7 @@ object Operations {
       Seq(javaPath) ++
         javaOpts ++
         Seq(
+          "-Dlibdaemonjvm.internal.DefaultSocketHandler=Java16SocketHandler",
           "-cp",
           classPath.map(_.toString).mkString(File.pathSeparator),
           "bloop.Server"

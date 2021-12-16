@@ -69,6 +69,8 @@ object BloopUtil {
           "launch",
           jvmArgs,
           s"${bloopOrg(currentBloopVersion)}:bloopgun_2.12:$currentBloopVersion",
+          "--java-prop",
+          "libdaemonjvm.internal.DefaultSocketHandler=Java16SocketHandler",
           "--",
           daemonArgs,
           args
