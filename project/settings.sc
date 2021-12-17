@@ -202,7 +202,7 @@ trait CliLaunchers extends SbtModule { self =>
   trait CliNativeImage extends NativeImage {
     def nativeImageCsCommand    = Seq(cs())
     def nativeImagePersist      = System.getenv("CI") != null
-    def nativeImageGraalVmJvmId = s"graalvm-java11:${deps.graalVmVersion}"
+    def nativeImageGraalVmJvmId = s"graalvm-java17:${deps.graalVmVersion}"
     def nativeImageOptions = T {
       val usesDocker = nativeImageDockerParams().nonEmpty
       val cLibPath =
@@ -370,7 +370,7 @@ trait CliLaunchers extends SbtModule { self =>
       // format: off
       Seq(
         cs(), "java-home",
-        "--jvm", s"graalvm-java11:$graalVmVersion",
+        "--jvm", s"graalvm-java17:$graalVmVersion",
         "--jvm-index", jvmIndex
       ).!!.trim
       // format: on
