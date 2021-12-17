@@ -182,14 +182,14 @@ final case class SharedOptions(
   def bloopRifleConfig(): BloopRifleConfig = {
 
     val bo    = buildOptions(false, None)
-    val javaV = bo.javaHome().value.version
+    implicit val ec = bo.finalCache.ec
+    val command = os.Path(bo.javaHomeManager.get("temurin:17").unsafeRun()) / "bin" / "java.exe"
     compilationServer.bloopRifleConfig(
       logging.logger,
       logging.verbosity,
-      // This might download a JVM if --jvm … is passed or no system JVM is installed
-      bo.javaHome().value.javaCommand,
+      command.toString,
       directories.directories,
-      Some(javaV)
+      Some(17)
     )
   }
 

@@ -90,7 +90,7 @@ object Deps {
   def usingDirectives          = ivy"org.virtuslab:using_directives:0.0.7-4f0dd5d-SNAPSHOT"
 }
 
-def graalVmVersion = "21.2.0"
+def graalVmVersion = "21.3.0"
 
 def csDockerVersion = Deps.Versions.coursier
 

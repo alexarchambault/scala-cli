@@ -138,6 +138,7 @@ object ScalaCli extends CommandsEntryPoint {
   }
 
   private def main0(args: Array[String]): Unit = {
+    sys.props("libdaemonjvm.internal.DefaultSocketHandler") = "Java16SocketHandler"
     val (systemProps, scalaCliArgs) = partitionArgs(args)
     setSystemProps(systemProps)
 
