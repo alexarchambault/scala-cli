@@ -211,7 +211,8 @@ trait CliLaunchers extends SbtModule { self =>
       Seq(
         s"-H:IncludeResources=$localRepoResourcePath",
         "-H:-ParseRuntimeOptions",
-        s"-H:CLibraryPath=$cLibPath"
+        s"-H:CLibraryPath=$cLibPath",
+        "-H:-CheckToolchain"
       )
     }
     def nativeImageName      = "scala-cli"
