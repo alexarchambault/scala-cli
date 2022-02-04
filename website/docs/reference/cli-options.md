@@ -92,6 +92,7 @@ Available in commands:
 - [`fmt` / `format` / `scalafmt`](./commands.md#fmt)
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -173,6 +174,7 @@ Print the resulting class path
 
 Available in commands:
 - [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`shebang`](./commands.md#shebang)
@@ -195,6 +197,7 @@ Available in commands:
 - [`fmt` / `format` / `scalafmt`](./commands.md#fmt)
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -227,6 +230,7 @@ Available in commands:
 - [`fmt` / `format` / `scalafmt`](./commands.md#fmt)
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -268,6 +272,7 @@ Available in commands:
 - [`install completions` / `install-completions`](./commands.md#install-completions)
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -349,6 +354,7 @@ Available in commands:
 - [`install-home`](./commands.md#install-home)
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -385,6 +391,7 @@ Available in commands:
 - [`fmt` / `format` / `scalafmt`](./commands.md#fmt)
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -497,6 +504,7 @@ Available in commands:
 - [`fmt` / `format` / `scalafmt`](./commands.md#fmt)
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -551,6 +559,7 @@ Available in commands:
 - [`install completions` / `install-completions`](./commands.md#install-completions)
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -575,6 +584,7 @@ Use progress bars
 Available in commands:
 - [`export`](./commands.md#export)
 - [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
 - [`run`](./commands.md#run)
 - [`shebang`](./commands.md#shebang)
 
@@ -781,6 +791,30 @@ The image repository
 
 The image tag; the default tag is `latest`
 
+## Publish options
+
+Available in commands:
+- [`publish`](./commands.md#publish)
+
+
+<!-- Automatically generated, DO NOT EDIT MANUALLY -->
+
+#### `--working-dir`
+
+Directory where temporary files for publishing should be written
+
+#### `--organization`
+
+#### `--module-name`
+
+#### `--version`
+
+#### `--url`
+
+#### `--licenses`
+
+#### `--vcs`
+
 ## Repl options
 
 Available in commands:
@@ -818,6 +852,7 @@ Available in commands:
 - [`fmt` / `format` / `scalafmt`](./commands.md#fmt)
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -886,6 +921,7 @@ Available in commands:
 - [`fmt` / `format` / `scalafmt`](./commands.md#fmt)
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -944,6 +980,7 @@ Available in commands:
 - [`fmt` / `format` / `scalafmt`](./commands.md#fmt)
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -978,6 +1015,7 @@ Available in commands:
 - [`fmt` / `format` / `scalafmt`](./commands.md#fmt)
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -1096,6 +1134,7 @@ Available in commands:
 - [`install-home`](./commands.md#install-home)
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -1118,6 +1157,7 @@ Increase verbosity (can be specified multiple times)
 Available in commands:
 - [`compile`](./commands.md#compile)
 - [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`shebang`](./commands.md#shebang)

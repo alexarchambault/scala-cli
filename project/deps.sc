@@ -65,6 +65,7 @@ object Deps {
   def collectionCompat           = ivy"org.scala-lang.modules::scala-collection-compat:2.6.0"
   def coursierJvm                = ivy"io.get-coursier::coursier-jvm:${Versions.coursier}"
   def coursierLauncher           = ivy"io.get-coursier::coursier-launcher:${Versions.coursier}"
+  def coursierPublish            = ivy"io.get-coursier.publish::publish:0.0.1-SNAPSHOT"
   def dataClass                  = ivy"io.github.alexarchambault::data-class:0.2.5"
   def dependency                 = ivy"io.get-coursier::dependency:0.2.0"
   def expecty                    = ivy"com.eed3si9n.expecty::expecty:0.15.4"

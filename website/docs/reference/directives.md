@@ -103,6 +103,22 @@ Set the default platform to Scala.JS or Scala Native
 
 `//> using platform "jvm", "scala-native"`
 
+### Publish
+
+Set parameters for publishing
+
+`//> using organization `"value"
+`//> using moduleName `"value"
+`//> using version `"value"
+
+
+#### Examples
+`//> using organization "io.github.myself"`
+
+`//> using moduleName "my-library"`
+
+`//> using version "0.1.1"`
+
 ### Repository
 
 Add a repository for dependency resolution

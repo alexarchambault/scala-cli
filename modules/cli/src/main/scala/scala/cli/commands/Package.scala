@@ -52,6 +52,7 @@ object Package extends ScalaCommand[PackageOptions] {
         bloopRifleConfig,
         logger,
         crossBuilds = cross,
+        partial = None,
         postAction = () => WatchUtil.printWatchMessage()
       ) { res =>
         res.orReport(logger).map(_.main).foreach {
@@ -60,6 +61,8 @@ object Package extends ScalaCommand[PackageOptions] {
               .orReport(logger)
           case _: Build.Failed =>
             System.err.println("Compilation failed")
+          case _: Build.Cancelled =>
+            System.err.println("Build cancelled")
         }
       }
       try WatchUtil.waitForCtrlC()
@@ -67,14 +70,23 @@ object Package extends ScalaCommand[PackageOptions] {
     }
     else {
       val builds =
-        Build.build(inputs, initialBuildOptions, bloopRifleConfig, logger, crossBuilds = cross)
-          .orExit(logger)
+        Build.build(
+          inputs,
+          initialBuildOptions,
+          bloopRifleConfig,
+          logger,
+          crossBuilds = cross,
+          partial = None
+        ).orExit(logger)
       builds.main match {
         case s: Build.Successful =>
           doPackage(inputs, logger, options.output.filter(_.nonEmpty), options.force, s)
             .orExit(logger)
         case _: Build.Failed =>
           System.err.println("Compilation failed")
+          sys.exit(1)
+        case _: Build.Cancelled =>
+          System.err.println("Build cancelled")
           sys.exit(1)
       }
     }
@@ -104,6 +116,7 @@ object Package extends ScalaCommand[PackageOptions] {
 
     def extension = packageType match {
       case PackageType.LibraryJar                 => ".jar"
+      case PackageType.SourceJar                  => ".jar"
       case PackageType.Assembly                   => ".jar"
       case PackageType.Js                         => ".js"
       case PackageType.Debian                     => ".deb"
@@ -117,6 +130,7 @@ object Package extends ScalaCommand[PackageOptions] {
     }
     def defaultName = packageType match {
       case PackageType.LibraryJar                 => "library.jar"
+      case PackageType.SourceJar                  => "source.jar"
       case PackageType.Assembly                   => "app.jar"
       case PackageType.Js                         => "app.js"
       case PackageType.Debian                     => "app.deb"
@@ -165,6 +179,12 @@ object Package extends ScalaCommand[PackageOptions] {
         bootstrap(build, destPath, value(mainClass), () => alreadyExistsCheck())
       case PackageType.LibraryJar =>
         val content = libraryJar(build)
+        alreadyExistsCheck()
+        if (force) os.write.over(destPath, content)
+        else os.write(destPath, content)
+      case PackageType.SourceJar =>
+        val now = System.currentTimeMillis()
+        val content = sourceJar(build, now)
         alreadyExistsCheck()
         if (force) os.write.over(destPath, content)
         else os.write(destPath, content)
@@ -267,7 +287,7 @@ object Package extends ScalaCommand[PackageOptions] {
       }
   }
 
-  private def libraryJar(build: Build.Successful): Array[Byte] = {
+  def libraryJar(build: Build.Successful): Array[Byte] = {
 
     val baos = new ByteArrayOutputStream
 
@@ -304,6 +324,8 @@ object Package extends ScalaCommand[PackageOptions] {
     val baos                 = new ByteArrayOutputStream
     var zos: ZipOutputStream = null
 
+    pprint.stderr.log(build.sources.paths)
+    pprint.stderr.log(build.sources.inMemory)
     def fromSimpleSources = build.sources.paths.iterator.map {
       case (path, relPath) =>
         val lastModified = os.mtime(path)

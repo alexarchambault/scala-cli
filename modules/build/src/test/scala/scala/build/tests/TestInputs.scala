@@ -46,7 +46,8 @@ final case class TestInputs(
           buildThreads,
           bloopConfig,
           TestLogger(),
-          crossBuilds = false
+          crossBuilds = false,
+          partial = None
         )
       f(root, inputs, res.map(_.main))
     }

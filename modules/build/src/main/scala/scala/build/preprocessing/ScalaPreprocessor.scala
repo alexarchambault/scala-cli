@@ -65,7 +65,8 @@ case object ScalaPreprocessor extends Preprocessor {
     UsingCustomJarDirectiveHandler,
     UsingResourcesDirectiveHandler,
     UsingCompilerPluginDirectiveHandler,
-    UsingMainClassDirectiveHandler
+    UsingMainClassDirectiveHandler,
+    UsingPublishDirectiveHandler
   )
 
   val requireDirectiveHandlers = Seq[RequireDirectiveHandler](

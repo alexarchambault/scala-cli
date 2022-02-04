@@ -83,6 +83,7 @@ object Repl extends ScalaCommand[ReplOptions] {
         bloopRifleConfig,
         logger,
         crossBuilds = cross,
+        partial = None,
         postAction = () => WatchUtil.printWatchMessage()
       ) { res =>
         for (builds <- res.orReport(logger))
@@ -98,8 +99,14 @@ object Repl extends ScalaCommand[ReplOptions] {
     }
     else {
       val builds =
-        Build.build(inputs, initialBuildOptions, bloopRifleConfig, logger, crossBuilds = cross)
-          .orExit(logger)
+        Build.build(
+          inputs,
+          initialBuildOptions,
+          bloopRifleConfig,
+          logger,
+          crossBuilds = cross,
+          partial = None
+        ).orExit(logger)
       builds.main match {
         case s: Build.Successful =>
           doRunRepl(s.options, s.artifacts, s.outputOpt, allowExit = true)

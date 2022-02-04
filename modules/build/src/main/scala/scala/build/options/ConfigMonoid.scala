@@ -5,6 +5,9 @@ import shapeless._
 trait ConfigMonoid[T] {
   def zero: T
   def orElse(main: T, defaults: T): T
+
+  def sum(values: Seq[T]): T =
+    values.foldLeft(zero)(orElse(_, _))
 }
 
 object ConfigMonoid {

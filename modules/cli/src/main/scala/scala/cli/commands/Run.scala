@@ -69,6 +69,7 @@ object Run extends ScalaCommand[RunOptions] {
         bloopRifleConfig,
         logger,
         crossBuilds = cross,
+        partial = None,
         postAction = () => WatchUtil.printWatchMessage()
       ) { res =>
         res.orReport(logger).map(_.main).foreach {
@@ -84,8 +85,14 @@ object Run extends ScalaCommand[RunOptions] {
     }
     else {
       val builds =
-        Build.build(inputs, initialBuildOptions, bloopRifleConfig, logger, crossBuilds = cross)
-          .orExit(logger)
+        Build.build(
+          inputs,
+          initialBuildOptions,
+          bloopRifleConfig,
+          logger,
+          crossBuilds = cross,
+          partial = None
+        ).orExit(logger)
       builds.main match {
         case s: Build.Successful =>
           maybeRun(s, allowTerminate = true)
