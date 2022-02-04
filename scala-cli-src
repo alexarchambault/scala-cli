@@ -2,8 +2,11 @@
 set -euo pipefail
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 ROOT_DIR="$SCRIPT_DIR"
+LAUNCHER="$ROOT_DIR/out/cli/launcher/dest/launcher"
+if ! test -e "$LAUNCHER"; then
 (
    cd "$ROOT_DIR" || exit
-   ./mill cli.standaloneLauncher
+   ./mill cli.launcher
 )
-exec "$ROOT_DIR/out/cli/standaloneLauncher/dest/launcher" "$@"
+fi
+exec "$LAUNCHER" "$@"

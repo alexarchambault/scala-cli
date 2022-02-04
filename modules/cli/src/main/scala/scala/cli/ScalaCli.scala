@@ -101,8 +101,7 @@ object ScalaCli {
           case _ =>
         }
 
-        if (CurrentParams.verbosity >= 2) throw e
-        else sys.exit(1)
+        throw e
     }
   }
 

@@ -50,7 +50,8 @@ object InternalDeps {
 object Deps {
   object Versions {
     // jni-utils version may need to be sync-ed when bumping the coursier version
-    def coursier = "2.1.0-M2"
+    def coursier    = "2.1.0-M4-1-94680bfc1-SNAPSHOT"
+    def coursierCli = "2.1.0-M4-1"
 
     def scalaJs       = "1.8.0"
     def scalaMeta     = "4.4.33"
@@ -111,9 +112,9 @@ object Deps {
 private def graalVmVersion = "22.0.0"
 def graalVmJvmId           = s"graalvm-java17:$graalVmVersion"
 
-def csDockerVersion = Deps.Versions.coursier
+def csDockerVersion = Deps.Versions.coursierCli
 
-def buildCsVersion = Deps.Versions.coursier
+def buildCsVersion = Deps.Versions.coursierCli
 
 object Docker {
   def customMuslBuilderImageName = "scala-cli-base-musl"
