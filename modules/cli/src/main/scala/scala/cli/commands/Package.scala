@@ -52,6 +52,7 @@ object Package extends ScalaCommand[PackageOptions] {
         bloopRifleConfig,
         logger,
         crossBuilds = cross,
+        buildTests = false,
         partial = None,
         postAction = () => WatchUtil.printWatchMessage()
       ) { res =>
@@ -76,6 +77,7 @@ object Package extends ScalaCommand[PackageOptions] {
           bloopRifleConfig,
           logger,
           crossBuilds = cross,
+          buildTests = false,
           partial = None
         ).orExit(logger)
       builds.main match {

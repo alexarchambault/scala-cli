@@ -170,6 +170,10 @@ Aliases: `-p`, `--classpath`
 
 Print the resulting class path
 
+#### `--test`
+
+Compile test scope
+
 ## Compile cross options
 
 Available in commands:
