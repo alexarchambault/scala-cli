@@ -1110,3 +1110,7 @@ object ci extends Module {
     destJavaHome
   }
 }
+
+def updateLicensesFile() = T.command {
+  settings.updateLicensesFile()
+}
