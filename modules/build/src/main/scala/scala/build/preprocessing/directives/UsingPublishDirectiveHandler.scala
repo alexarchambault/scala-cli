@@ -67,7 +67,10 @@ case object UsingPublishDirectiveHandler extends UsingDirectiveHandler {
       case "url" =>
         PublishOptions(url = Some(value0))
       case "license" =>
-        PublishOptions(license = Some(value0.map(PublishOptions.parseLicense(_))))
+        val license = value0.copy(
+          value = value(PublishOptions.parseLicense(value0.value))
+        )
+        PublishOptions(license = Some(license))
       case "versionControl" | "version-control" | "scm" =>
         PublishOptions(versionControl = Some(value(PublishOptions.parseVcs(value0))))
       case "description" =>

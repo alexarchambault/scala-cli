@@ -86,10 +86,14 @@ final case class PublishOptions(
           name = moduleName.map(_.trim).filter(_.nonEmpty).map(Positioned.commandLine(_)),
           version = version.map(_.trim).filter(_.nonEmpty).map(Positioned.commandLine(_)),
           url = url.map(_.trim).filter(_.nonEmpty).map(Positioned.commandLine(_)),
-          license = license.map(_.trim)
-            .filter(_.nonEmpty)
-            .map(BPublishOptions.parseLicense(_))
-            .map(Positioned.commandLine(_)),
+          license = {
+            license.map(_.trim).filter(_.nonEmpty) match {
+              case None => None
+              case Some(input) =>
+                val license = value(BPublishOptions.parseLicense(input))
+                Some(Positioned.commandLine(license))
+            }
+          },
           versionControl = value {
             vcs.map(_.trim).filter(_.nonEmpty)
               .map(Positioned.commandLine(_))

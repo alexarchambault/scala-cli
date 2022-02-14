@@ -25,10 +25,10 @@ object PublishOptions {
   final case class Developer(id: String, name: String, url: String, mail: Option[String] = None)
   final case class Vcs(url: String, connection: String, developerConnection: String)
 
-  def parseLicense(input: String): License =
+  def parseLicense(input: String): Either[BuildException, License] =
     input.split(":", 2) match {
-      case Array(name)      => License(name, "")
-      case Array(name, url) => License(name, url)
+      case Array(name)      => Right(License(name, ""))
+      case Array(name, url) => Right(License(name, url))
     }
   def parseDeveloper(input: Positioned[String]): Either[BuildException, Developer] =
     input.value.split("|", 4) match {
