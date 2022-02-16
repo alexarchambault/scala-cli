@@ -69,11 +69,18 @@ final case class Project(
     BloopConfig.File(BloopConfig.File.LatestVersion, bloopProject)
 
   def writeBloopFile(logger: Logger): Boolean = {
-    val bloopFileContent = writeAsJsonToArray(bloopFile)(BloopCodecs.codecFile)
-    val dest             = directory / ".bloop" / s"$projectName.json"
+    lazy val bloopFileContent =
+      writeAsJsonToArray(bloopFile)(BloopCodecs.codecFile)
+    val dest = directory / ".bloop" / s"$projectName.json"
     val doWrite = !os.isFile(dest) || {
-      val currentContent = os.read.bytes(dest)
-      !Arrays.equals(currentContent, bloopFileContent)
+      val ignoreContent =
+        java.lang.Boolean.getBoolean("scala-cli.bloop.loose-comparison") ||
+        Option(System.getenv("SCALA_CLI_BLOOP_LOOSE")).exists(v => v == "1" || v == "true")
+      !ignoreContent && {
+        logger.debug(s"Checking Bloop project in $dest")
+        val currentContent = os.read.bytes(dest)
+        !Arrays.equals(currentContent, bloopFileContent)
+      }
     }
     if (doWrite) {
       logger.debug(s"Writing bloop project in $dest")
