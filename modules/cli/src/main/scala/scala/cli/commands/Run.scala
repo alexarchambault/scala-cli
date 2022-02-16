@@ -124,7 +124,7 @@ object Run extends ScalaCommand[RunOptions] {
       case Some(cls) => cls
       case None      => value(build.retainedMainClass)
     }
-    val verbosity = build.options.internal.verbosity.getOrElse(0).toString
+    val verbosity = build.options.notForBloopOptions.internal.verbosity.getOrElse(0).toString
 
     val (finalMainClass, finalArgs) =
       if (jvmRunner) (Constants.runnerMainClass, mainClass +: verbosity +: args)

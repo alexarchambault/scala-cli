@@ -1,6 +1,7 @@
 package scala.cli.commands
 
 import caseapp._
+import coursier.cache.FileCache
 
 import scala.build.EitherCps.{either, value}
 import scala.build.errors.BuildException
@@ -126,6 +127,7 @@ object Repl extends ScalaCommand[ReplOptions] {
     dryRun: Boolean
   ): Either[BuildException, Unit] = either {
 
+    val cache = options.notForBloopOptions.internal.cache.getOrElse(FileCache())
     val replArtifacts = value {
       if (options.notForBloopOptions.replOptions.useAmmonite)
         ReplArtifacts.ammonite(
@@ -135,6 +137,7 @@ object Repl extends ScalaCommand[ReplOptions] {
           artifacts.extraClassPath,
           artifacts.extraSourceJars,
           logger,
+          cache,
           directories
         )
       else
@@ -143,6 +146,7 @@ object Repl extends ScalaCommand[ReplOptions] {
           artifacts.dependencies,
           artifacts.extraClassPath,
           logger,
+          cache,
           options.finalRepositories
         )
     }
