@@ -99,7 +99,7 @@ class CustomProgressBarRefreshDisplay(
 
       for (_ <- downloads.indices)
         out.up(2)
-      if (keepOnScreen)
+      if (!keepOnScreen)
         for (_ <- done0.indices)
           out.up(2)
 
