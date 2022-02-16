@@ -150,7 +150,7 @@ final case class BuildOptions(
     else None
   }
 
-  lazy val finalCache = notForBloopOptions.internal.cache.getOrElse(FileCache())
+  lazy val finalCache = notForBloopOptions.internal.cache.getOrElse(???)
   // This might download a JVM if --jvm … is passed or no system JVM is installed
 
   case class JavaHomeInfo(javaCommand: String, version: Int)
