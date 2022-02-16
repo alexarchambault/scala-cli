@@ -5,12 +5,14 @@ import scala.build.internal.{OsLibc, Runner}
 import scala.build.options.{BuildOptions, JavaOptions}
 import scala.build.{Artifacts, Positioned}
 import scala.cli.commands.LoggingOptions
+import scala.cli.commands.CoursierOptions
 
 object LauncherCli {
 
   def runAndExit(version: String, options: LauncherOptions, remainingArgs: Seq[String]): Nothing = {
 
     val logger       = LoggingOptions().logger
+    val cache = CoursierOptions().coursierCache(logger.coursierLogger)
     val scalaVersion = options.cliScalaVersion.getOrElse("2.12")
 
     val scalaCliDependency = Seq(dep"org.virtuslab.scala-cli:cli_$scalaVersion:$version")
@@ -23,6 +25,7 @@ object LauncherCli {
         snapshotsRepo,
         ScalaParameters(scalaVersion),
         logger,
+        cache,
         None
       ) match {
         case Right(value) => value
