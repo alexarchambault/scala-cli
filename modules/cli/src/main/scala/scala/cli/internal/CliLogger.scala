@@ -2,7 +2,7 @@ package scala.cli.internal
 
 import ch.epfl.scala.{bsp4j => b}
 import coursier.cache.CacheLogger
-import coursier.cache.loggers.{FallbackRefreshDisplay, ProgressBarRefreshDisplay, RefreshLogger}
+import coursier.cache.loggers.{FallbackRefreshDisplay, RefreshLogger, SingleLineRefreshDisplay}
 
 import java.io.PrintStream
 
@@ -11,6 +11,7 @@ import scala.build.errors.{BuildException, CompositeBuildException, Diagnostic, 
 import scala.build.{ConsoleBloopBuildClient, Logger, Position}
 import scala.collection.mutable
 import scala.scalanative.{build => sn}
+
 class CliLogger(
   verbosity: Int,
   quiet: Boolean,
@@ -128,7 +129,7 @@ class CliLogger(
     if (quiet)
       CacheLogger.nop
     else if (progress.getOrElse(coursier.paths.Util.useAnsiOutput()))
-      RefreshLogger.create(ProgressBarRefreshDisplay.create())
+      RefreshLogger.create(SingleLineRefreshDisplay.create())
     else
       RefreshLogger.create(new FallbackRefreshDisplay)
 
