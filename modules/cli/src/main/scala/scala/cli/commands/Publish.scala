@@ -238,7 +238,7 @@ object Publish extends ScalaCommand[PublishOptions] {
       ChecksumType.all.map(_.extension).toSet,
       Set("maven-metadata.xml"),
       signerLogger
-    ).unsafeRun()(ec)
+    )
 
     val fileSet1 = value {
       signRes
@@ -260,11 +260,12 @@ object Publish extends ScalaCommand[PublishOptions] {
       Seq(ChecksumType.MD5, ChecksumType.SHA1),
       fileSet1,
       now,
+      ec,
       checksumLogger
     ).unsafeRun()(ec)
     val fileSet2 = fileSet1 ++ checksums
 
-    val finalFileSet = fileSet2.order.unsafeRun()(ec)
+    val finalFileSet = fileSet2.order(ec).unsafeRun()(ec)
 
     val repoUrl = builds.head.options.notForBloopOptions.publishOptions.repository match {
       case None =>
@@ -276,7 +277,7 @@ object Publish extends ScalaCommand[PublishOptions] {
     val repo = MavenRepository(repoUrl)
 
     val upload =
-      if (repo.root.startsWith("http")) HttpURLConnectionUpload.create(ec)
+      if (repo.root.startsWith("http")) HttpURLConnectionUpload.create()
       else FileUpload(Paths.get(new URI(repo.root)))
 
     val dummy        = false
@@ -284,7 +285,7 @@ object Publish extends ScalaCommand[PublishOptions] {
     val uploadLogger = InteractiveUploadLogger.create(System.err, dummy = dummy, isLocal = isLocal)
 
     val errors =
-      upload.uploadFileSet(repo, finalFileSet, uploadLogger, parallel = true).unsafeRun()(ec)
+      upload.uploadFileSet(repo, finalFileSet, uploadLogger, Some(ec)).unsafeRun()(ec)
 
     errors.toList match {
       case h :: t =>
