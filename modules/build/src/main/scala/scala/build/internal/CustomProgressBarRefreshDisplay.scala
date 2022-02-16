@@ -39,7 +39,6 @@ class CustomProgressBarRefreshDisplay(
     out.flush()
 
     if (printedAnything0) {
-      System.err.println(s"after output $this (${Thread.currentThread()})")
       afterOutput
       printedAnything0 = false
     }
@@ -77,7 +76,6 @@ class CustomProgressBarRefreshDisplay(
         assert(info != null, s"Incoherent state ($url)")
 
         if (!printedAnything0) {
-          System.err.println(s"before output $this (${Thread.currentThread()})")
           beforeOutput
           printedAnything0 = true
         }
@@ -101,18 +99,17 @@ class CustomProgressBarRefreshDisplay(
 
       for (_ <- downloads.indices)
         out.up(2)
-      /*if (!keepOnScreen)
+      if (keepOnScreen)
         for (_ <- done0.indices)
-          out.up(2)*/
+          out.up(2)
 
       out.left(10000)
 
       out.flush()
 
       currentHeight =
-        // if (keepOnScreen)
-           downloads.length
-        // else displayedCount
+        if (keepOnScreen) downloads.length
+        else displayedCount
     }
 
 }
