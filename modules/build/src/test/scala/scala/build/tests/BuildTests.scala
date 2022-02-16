@@ -18,6 +18,7 @@ import scala.build.options.{
   BuildOptions,
   InternalOptions,
   JavaOpt,
+  PostBuildOptions,
   ScalacOpt,
   ScalaOptions,
   ShadowingSeq
@@ -48,9 +49,11 @@ class BuildTests extends munit.FunSuite {
       scalaVersion = Some(sv2),
       scalaBinaryVersion = None
     ),
-    internal = InternalOptions(
-      localRepository = LocalRepo.localRepo(directories.localRepoDir),
-      keepDiagnostics = true
+    notForBloopOptions = PostBuildOptions(
+      internal = InternalOptions(
+        localRepository = LocalRepo.localRepo(directories.localRepoDir),
+        keepDiagnostics = true
+      )
     )
   )
 
@@ -364,8 +367,10 @@ class BuildTests extends munit.FunSuite {
           |""".stripMargin
     )
     val buildOptions = defaultOptions.copy(
-      internal = defaultOptions.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultOptions.notForBloopOptions.copy(
+        internal = defaultOptions.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       )
     )
     testInputs.withBuild(buildOptions, buildThreads, bloopConfig) { (root, _, maybeBuild) =>
@@ -393,8 +398,10 @@ class BuildTests extends munit.FunSuite {
           |""".stripMargin
     )
     val buildOptions = defaultScala3Options.copy(
-      internal = defaultScala3Options.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultScala3Options.notForBloopOptions.copy(
+        internal = defaultScala3Options.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       )
     )
     testInputs.withBuild(buildOptions, buildThreads, bloopConfig) { (root, _, maybeBuild) =>
@@ -560,8 +567,10 @@ class BuildTests extends munit.FunSuite {
           |""".stripMargin
     )
     val buildOptions = defaultOptions.copy(
-      internal = defaultOptions.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultOptions.notForBloopOptions.copy(
+        internal = defaultOptions.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       )
     )
     inputs.withBuild(buildOptions, buildThreads, bloopConfig) { (_, _, maybeBuild) =>
@@ -586,8 +595,10 @@ class BuildTests extends munit.FunSuite {
           |""".stripMargin
     )
     val buildOptions = defaultOptions.copy(
-      internal = defaultOptions.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultOptions.notForBloopOptions.copy(
+        internal = defaultOptions.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       )
     )
     inputs.withBuild(buildOptions, buildThreads, bloopConfig) { (_, _, maybeBuild) =>
@@ -602,8 +613,10 @@ class BuildTests extends munit.FunSuite {
           |""".stripMargin
     )
     val buildOptions = defaultOptions.copy(
-      internal = defaultOptions.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultOptions.notForBloopOptions.copy(
+        internal = defaultOptions.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       )
     )
     inputs.withBuild(buildOptions, buildThreads, bloopConfig) { (_, _, maybeBuild) =>
@@ -621,8 +634,10 @@ class BuildTests extends munit.FunSuite {
           |""".stripMargin
     )
     val buildOptions = defaultOptions.copy(
-      internal = defaultOptions.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultOptions.notForBloopOptions.copy(
+        internal = defaultOptions.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       )
     )
     inputs.withBuild(buildOptions, buildThreads, bloopConfig) { (_, _, maybeBuild) =>
@@ -641,8 +656,10 @@ class BuildTests extends munit.FunSuite {
           |""".stripMargin
     )
     val buildOptions: BuildOptions = defaultOptions.copy(
-      internal = defaultOptions.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultOptions.notForBloopOptions.copy(
+        internal = defaultOptions.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       )
     )
 
@@ -659,8 +676,10 @@ class BuildTests extends munit.FunSuite {
           |""".stripMargin
     )
     val buildOptions = defaultOptions.copy(
-      internal = defaultOptions.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultOptions.notForBloopOptions.copy(
+        internal = defaultOptions.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       )
     )
     inputs.withBuild(buildOptions, buildThreads, bloopConfig) { (_, _, maybeBuild) =>
@@ -679,8 +698,10 @@ class BuildTests extends munit.FunSuite {
           |""".stripMargin
     )
     val buildOptions: BuildOptions = defaultOptions.copy(
-      internal = defaultOptions.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultOptions.notForBloopOptions.copy(
+        internal = defaultOptions.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       )
     )
 
@@ -697,8 +718,10 @@ class BuildTests extends munit.FunSuite {
           |""".stripMargin
     )
     val buildOptions: BuildOptions = defaultOptions.copy(
-      internal = defaultOptions.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultOptions.notForBloopOptions.copy(
+        internal = defaultOptions.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       )
     )
 
@@ -720,8 +743,10 @@ class BuildTests extends munit.FunSuite {
           |""".stripMargin
     )
     val buildOptions: BuildOptions = defaultOptions.copy(
-      internal = defaultOptions.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultOptions.notForBloopOptions.copy(
+        internal = defaultOptions.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       )
     )
 
@@ -738,8 +763,10 @@ class BuildTests extends munit.FunSuite {
           |""".stripMargin
     )
     val buildOptions: BuildOptions = defaultOptions.copy(
-      internal = defaultOptions.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultOptions.notForBloopOptions.copy(
+        internal = defaultOptions.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       )
     )
 
@@ -761,8 +788,10 @@ class BuildTests extends munit.FunSuite {
           |""".stripMargin
     )
     val buildOptions: BuildOptions = defaultOptions.copy(
-      internal = defaultOptions.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultOptions.notForBloopOptions.copy(
+        internal = defaultOptions.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       )
     )
 
@@ -827,8 +856,10 @@ class BuildTests extends munit.FunSuite {
 
     // Emulates options derived from cli
     val buildOptions: BuildOptions = defaultOptions.copy(
-      internal = defaultOptions.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultOptions.notForBloopOptions.copy(
+        internal = defaultOptions.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       ),
       classPathOptions = defaultOptions.classPathOptions.copy(
         extraDependencies = ShadowingSeq.from(Seq(Positioned.none(parsedCliDependency)))
@@ -858,8 +889,10 @@ class BuildTests extends munit.FunSuite {
 
     // Emulates options derived from cli
     val buildOptions = defaultOptions.copy(
-      internal = defaultOptions.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultOptions.notForBloopOptions.copy(
+        internal = defaultOptions.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       ),
       scalaOptions = defaultOptions.scalaOptions.copy(
         scalacOptions = ShadowingSeq.from(
@@ -892,8 +925,10 @@ class BuildTests extends munit.FunSuite {
 
     // Emulates options derived from cli
     val buildOptions: BuildOptions = defaultOptions.copy(
-      internal = defaultOptions.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultOptions.notForBloopOptions.copy(
+        internal = defaultOptions.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       ),
       javaOptions = defaultOptions.javaOptions.copy(
         javaOpts = ShadowingSeq.from(
@@ -919,8 +954,10 @@ class BuildTests extends munit.FunSuite {
     )
 
     val buildOptions: BuildOptions = defaultOptions.copy(
-      internal = defaultOptions.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultOptions.notForBloopOptions.copy(
+        internal = defaultOptions.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       )
     )
 
@@ -946,8 +983,10 @@ class BuildTests extends munit.FunSuite {
     )
 
     val buildOptions: BuildOptions = defaultOptions.copy(
-      internal = defaultOptions.internal.copy(
-        keepDiagnostics = true
+      notForBloopOptions = defaultOptions.notForBloopOptions.copy(
+        internal = defaultOptions.notForBloopOptions.internal.copy(
+          keepDiagnostics = true
+        )
       )
     )
 

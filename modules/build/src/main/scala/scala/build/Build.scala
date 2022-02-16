@@ -398,7 +398,7 @@ object Build {
   ): Either[BuildException, Builds] = {
     val buildClient = BloopBuildClient.create(
       logger,
-      keepDiagnostics = options.internal.keepDiagnostics
+      keepDiagnostics = options.notForBloopOptions.internal.keepDiagnostics
     )
     val classesDir0 = classesRootDir(inputs.workspace, inputs.projectName)
 
@@ -465,7 +465,7 @@ object Build {
 
     val buildClient = BloopBuildClient.create(
       logger,
-      keepDiagnostics = options.internal.keepDiagnostics
+      keepDiagnostics = options.notForBloopOptions.internal.keepDiagnostics
     )
     val threads     = BuildThreads.create()
     val classesDir0 = classesRootDir(inputs.workspace, inputs.projectName)

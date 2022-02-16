@@ -3,7 +3,7 @@ package scala.build.tests
 import com.eed3si9n.expecty.Expecty.{assert => expect}
 
 import scala.build.internal.NativeBuilderHelper
-import scala.build.options.{BuildOptions, InternalOptions}
+import scala.build.options.{BuildOptions, InternalOptions, PostBuildOptions}
 import scala.build.tests.util.BloopServer
 import scala.build.{BuildThreads, Directories, LocalRepo}
 import scala.util.{Properties, Random}
@@ -32,8 +32,10 @@ class NativeBuilderHelperTests extends munit.FunSuite {
   val directories     = Directories.under(extraRepoTmpDir)
 
   val defaultOptions = BuildOptions(
-    internal = InternalOptions(
-      localRepository = LocalRepo.localRepo(directories.localRepoDir)
+    notForBloopOptions = PostBuildOptions(
+      internal = InternalOptions(
+        localRepository = LocalRepo.localRepo(directories.localRepoDir)
+      )
     )
   )
 

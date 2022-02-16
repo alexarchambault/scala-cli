@@ -3,7 +3,7 @@ package scala.cli.commands
 import caseapp._
 
 import scala.build.blooprifle.BloopRifleConfig
-import scala.build.options.{BuildOptions, InternalOptions}
+import scala.build.options.{BuildOptions, InternalOptions, PostBuildOptions}
 
 // format: off
 final case class BloopStartOptions(
@@ -25,8 +25,10 @@ final case class BloopStartOptions(
   def buildOptions: BuildOptions =
     BuildOptions(
       javaOptions = jvm.javaOptions,
-      internal = InternalOptions(
-        cache = Some(coursier.coursierCache(logging.logger.coursierLogger))
+      notForBloopOptions = PostBuildOptions(
+        internal = InternalOptions(
+          cache = Some(coursier.coursierCache(logging.logger.coursierLogger))
+        )
       )
     )
 

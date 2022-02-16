@@ -2,7 +2,7 @@ package scala.build.tests
 
 import scala.build.errors.Severity
 import com.eed3si9n.expecty.Expecty.expect
-import scala.build.options.{BuildOptions, InternalOptions, JavaOptions, Scope}
+import scala.build.options.{BuildOptions, InternalOptions, JavaOptions, PostBuildOptions, Scope}
 import scala.build.{Build, Inputs, LocalRepo, Positioned, Sources}
 import scala.build.options.{ScalacOpt, ScalaOptions, ShadowingSeq}
 import scala.build.Logger
@@ -58,8 +58,11 @@ class BuildProjectTests extends munit.FunSuite {
     scalacOptions: Seq[String] = Nil
   ) = {
     val options = BuildOptions(
-      internal = InternalOptions(localRepository =
-        LocalRepo.localRepo(scala.build.Directories.default().localRepoDir)
+      notForBloopOptions = PostBuildOptions(
+        internal = InternalOptions(
+          localRepository =
+            LocalRepo.localRepo(scala.build.Directories.default().localRepoDir)
+        )
       ),
       javaOptions = JavaOptions(
         bloopJvmVersion =
@@ -144,8 +147,11 @@ class BuildProjectTests extends munit.FunSuite {
   test("workspace for bsp") {
     val workspacePath = os.pwd
     val options = BuildOptions(
-      internal = InternalOptions(localRepository =
-        LocalRepo.localRepo(scala.build.Directories.default().localRepoDir))
+      notForBloopOptions = PostBuildOptions(
+        internal = InternalOptions(
+          localRepository =
+            LocalRepo.localRepo(scala.build.Directories.default().localRepoDir))
+      )
     )
     val inputs  = Inputs(Nil, None, workspacePath, "project", false)
     val sources = Sources(Nil, Nil, None, Nil, options)

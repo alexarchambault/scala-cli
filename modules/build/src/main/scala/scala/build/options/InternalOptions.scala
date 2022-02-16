@@ -11,6 +11,5 @@ final case class InternalOptions(
 )
 
 object InternalOptions {
-  implicit val hasHashData: HasHashData[InternalOptions] = HasHashData.nop
   implicit val monoid: ConfigMonoid[InternalOptions]     = ConfigMonoid.derive
 }

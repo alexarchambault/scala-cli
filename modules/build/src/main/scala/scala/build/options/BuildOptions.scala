@@ -35,7 +35,6 @@ final case class BuildOptions(
   jmhOptions: JmhOptions = JmhOptions(),
   classPathOptions: ClassPathOptions = ClassPathOptions(),
   scriptOptions: ScriptOptions = ScriptOptions(),
-  internal: InternalOptions = InternalOptions(),
   mainClass: Option[String] = None,
   testOptions: TestOptions = TestOptions(),
   notForBloopOptions: PostBuildOptions = PostBuildOptions()
@@ -151,7 +150,7 @@ final case class BuildOptions(
     else None
   }
 
-  lazy val finalCache = internal.cache.getOrElse(FileCache())
+  lazy val finalCache = notForBloopOptions.internal.cache.getOrElse(FileCache())
   // This might download a JVM if --jvm … is passed or no system JVM is installed
 
   case class JavaHomeInfo(javaCommand: String, version: Int)
@@ -271,7 +270,7 @@ final case class BuildOptions(
   }
 
   def finalRepositories: Seq[String] =
-    classPathOptions.extraRepositories ++ internal.localRepository.toSeq
+    classPathOptions.extraRepositories ++ notForBloopOptions.internal.localRepository.toSeq
 
   private def computeScalaVersions(
     scalaVersion: Option[String],
