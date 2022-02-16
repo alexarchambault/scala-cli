@@ -21,10 +21,15 @@ import scala.build.errors.{
   UnsupportedScalaVersionError
 }
 import scala.build.internal.Constants._
+import scala.build.internal.CsLoggerUtil._
 import scala.build.internal.{OsLibc, StableScalaVersion, Util}
 import scala.build.options.validation.BuildOptionsRule
 import scala.build.{Artifacts, Logger, Os, Position, Positioned}
 import scala.util.Properties
+import scala.util.control.NonFatal
+import org.scalameta.logger
+import coursier.cache.loggers.RefreshLogger
+import scala.build.internal.CustomProgressBarRefreshDisplay
 
 final case class BuildOptions(
   scalaOptions: ScalaOptions = ScalaOptions(),
@@ -195,7 +200,13 @@ final case class BuildOptions(
                 s"liberica:$jvmId" // FIXME Workaround, until this is automatically handled by coursier-jvm
               else
                 jvmId
-            val path = javaHomeManager.get(jvmId0).unsafeRun()
+            val javaHomeManager0 = javaHomeManager
+              .withMessage(s"Downloading JVM $jvmId0")
+            val path =
+              try javaHomeManager0.get(jvmId0).unsafeRun()
+              catch {
+                case NonFatal(e) => throw new Exception(e)
+              }
             Positioned(Position.CommandLine("--jvm"), os.Path(path))
           }
         }
@@ -203,9 +214,16 @@ final case class BuildOptions(
 
   def javaHomeLocation(): Positioned[os.Path] =
     javaHomeLocationOpt().getOrElse {
+      val jvmId = OsLibc.defaultJvm(jvmIndexOs)
+      val javaHomeManager0 = javaHomeManager
+        .withMessage(s"Downloading JVM $jvmId")
       implicit val ec = finalCache.ec
       finalCache.logger.use {
-        val path = javaHomeManager.get(OsLibc.defaultJvm(jvmIndexOs)).unsafeRun()
+        val path =
+          try javaHomeManager0.get(jvmId).unsafeRun()
+          catch {
+            case NonFatal(e) => throw new Exception(e)
+          }
         Positioned(Position.Custom("OsLibc.defaultJvm"), os.Path(path))
       }
     }
@@ -216,11 +234,12 @@ final case class BuildOptions(
 
   private def latestSupportedScalaVersion(): Seq[Version] = {
 
+    val cache = finalCache.withMessage("Getting list of Scala CLI-supported Scala versions")
     val supportedScalaVersionsUrl = scalaOptions.scalaVersionsUrl
 
     val task = {
       val art = Artifact(supportedScalaVersionsUrl).withChanging(true)
-      finalCache.file(art).run.flatMap {
+      cache.file(art).run.flatMap {
         case Left(e) => Task.fail(e)
         case Right(f) =>
           Task.delay {
@@ -231,12 +250,12 @@ final case class BuildOptions(
     }
 
     val scalaCliVersion = version
-    val launchersTask   = finalCache.logger.using(task)
+    val launchersTask   = cache.logger.using(task)
 
     //  If an error occurred while downloading stable versions,
     //  it uses stable scala versions from Deps.sc
     val supportedScalaVersions =
-      launchersTask.attempt.unsafeRun()(finalCache.ec) match {
+      launchersTask.attempt.unsafeRun()(cache.ec) match {
         case Left(_) =>
           // FIXME Log the exception
           defaultStableScalaVersions
@@ -260,10 +279,19 @@ final case class BuildOptions(
 
   lazy val javaHomeManager = {
     val indexUrl  = javaOptions.jvmIndexOpt.getOrElse(JvmIndex.coursierIndexUrl)
-    val indexTask = JvmIndex.load(finalCache, indexUrl)
+    val indexTask = {
+      val cache = finalCache.withMessage("Downloading JVM index")
+      cache.logger.using {
+        JvmIndex.load(cache, indexUrl)
+      }
+    }
     val jvmCache = JvmCache()
       .withIndex(indexTask)
-      .withArchiveCache(ArchiveCache().withCache(finalCache))
+      .withArchiveCache(
+        ArchiveCache().withCache(
+          finalCache.withMessage("Downloading JVM")
+        )
+      )
       .withOs(jvmIndexOs)
       .withArchitecture(javaOptions.jvmIndexArch.getOrElse(JvmIndex.defaultArchitecture()))
     JavaHome().withCache(jvmCache)
@@ -290,11 +318,15 @@ final case class BuildOptions(
       def isStable(v: String): Boolean =
         !v.endsWith("-NIGHTLY") && !v.contains("-RC")
       def moduleVersions(mod: Module): Seq[String] = {
-        val res = finalCache.logger.use {
-          Versions()
+        val cache = finalCache.withMessage("Getting Scala version list")
+        val res = cache.logger.use {
+          try Versions(cache)
             .withModule(mod)
             .result()
             .unsafeRun()(ec)
+          catch {
+            case NonFatal(e) => throw new Exception(e)
+          }
         }
         res.versions.available.filter(isStable)
       }

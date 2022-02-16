@@ -27,7 +27,7 @@ final case class BloopStartOptions(
       javaOptions = jvm.javaOptions,
       notForBloopOptions = PostBuildOptions(
         internal = InternalOptions(
-          cache = Some(coursier.coursierCache(logging.logger.coursierLogger))
+          cache = Some(coursier.coursierCache(logging.logger.coursierLogger("")))
         )
       )
     )
@@ -35,7 +35,7 @@ final case class BloopStartOptions(
   def bloopRifleConfig(): BloopRifleConfig =
     compilationServer.bloopRifleConfig(
       logging.logger,
-      coursier.coursierCache(logging.logger.coursierLogger),
+      coursier.coursierCache(logging.logger.coursierLogger("Downloading Bloop")),
       logging.verbosity,
       buildOptions.javaHome().value.javaCommand,
       directories.directories
