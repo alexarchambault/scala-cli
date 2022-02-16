@@ -177,7 +177,7 @@ object Test extends ScalaCommand[TestOptions] {
 
         val extraArgs =
           (if (requireTests) Seq("--require-tests") else Nil) ++
-            build.options.internal.verbosity.map(v => s"--verbosity=$v") ++
+            build.options.notForBloopOptions.internal.verbosity.map(v => s"--verbosity=$v") ++
             testFrameworkOpt0.map(fw => s"--test-framework=$fw").toSeq ++
             Seq("--") ++ args
 
