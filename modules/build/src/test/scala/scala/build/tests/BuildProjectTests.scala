@@ -36,7 +36,7 @@ class BuildProjectTests extends munit.FunSuite {
 
     override def exit(ex: BuildException): Nothing = ???
 
-    override def coursierLogger: CacheLogger = CacheLogger.nop
+    override def coursierLogger(message: String): CacheLogger = CacheLogger.nop
 
     override def bloopRifleLogger: BloopRifleLogger = BloopRifleLogger.nop
 
