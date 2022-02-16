@@ -172,6 +172,10 @@ object Artifacts {
     }
 
     val compilerArtifacts = value {
+      new Exception().printStackTrace(System.err)
+      // System.err.println(s"compilerArtifacts:")
+      // Thread.currentThread().getStackTrace().foreach(l => System.err.println(s"  $l"))
+      // System.err.println()
       artifacts(
         Positioned.none(compilerDependencies),
         allExtraRepositories,
@@ -330,9 +334,9 @@ object Artifacts {
         .addClassifiers(classifiers.toSeq.filter(_ != "_").map(coursier.Classifier(_)): _*)
     }
 
-    val res = cache.logger.use {
+    val res = // cache.logger.use {
       fetcher.eitherResult()
-    }
+    // }
     value {
       res.left.map(ex => new FetchingDependenciesError(ex, dependencies.positions))
     }
