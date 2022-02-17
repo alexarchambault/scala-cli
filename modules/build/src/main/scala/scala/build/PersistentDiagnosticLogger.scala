@@ -27,6 +27,7 @@ class PersistentDiagnosticLogger(parent: Logger) extends Logger {
 
   def coursierLogger(printBefore: String): coursier.cache.CacheLogger        = parent.coursierLogger(printBefore)
   def bloopRifleLogger: BloopRifleLogger                = parent.bloopRifleLogger
+  def scalaJsLogger: org.scalajs.logging.Logger         = parent.scalaJsLogger
   def scalaNativeTestLogger: sn.Logger                  = parent.scalaNativeTestLogger
   def scalaNativeCliInternalLoggerOptions: List[String] = parent.scalaNativeCliInternalLoggerOptions
 

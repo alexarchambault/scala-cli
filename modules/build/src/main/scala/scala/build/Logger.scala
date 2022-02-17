@@ -26,6 +26,7 @@ trait Logger {
 
   def coursierLogger(printBefore: String): coursier.cache.CacheLogger
   def bloopRifleLogger: BloopRifleLogger
+  def scalaJsLogger: org.scalajs.logging.Logger
   def scalaNativeTestLogger: sn.Logger
   def scalaNativeCliInternalLoggerOptions: List[String]
 
@@ -48,6 +49,8 @@ object Logger {
       coursier.cache.CacheLogger.nop
     def bloopRifleLogger: BloopRifleLogger =
       BloopRifleLogger.nop
+    def scalaJsLogger: org.scalajs.logging.Logger =
+      org.scalajs.logging.NullLogger
     def scalaNativeTestLogger: sn.Logger =
       sn.Logger.nullLogger
     def scalaNativeCliInternalLoggerOptions: List[String] =

@@ -39,6 +39,8 @@ class BuildProjectTests extends munit.FunSuite {
     override def coursierLogger(message: String): CacheLogger = CacheLogger.nop
 
     override def bloopRifleLogger: BloopRifleLogger = BloopRifleLogger.nop
+    override def scalaJsLogger: org.scalajs.logging.Logger =
+      org.scalajs.logging.NullLogger
 
     override def scalaNativeTestLogger: scala.scalanative.build.Logger =
       scala.scalanative.build.Logger.nullLogger

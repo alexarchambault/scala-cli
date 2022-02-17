@@ -163,6 +163,16 @@ class CliLogger(
       def bloopCliInheritStderr = verbosity >= 3
     }
 
+  def scalaJsLogger: org.scalajs.logging.Logger =
+    // FIXME Doesn't use 'out'
+    new org.scalajs.logging.ScalaConsoleLogger(
+      minLevel =
+        if (verbosity >= 2) org.scalajs.logging.Level.Debug
+        else if (verbosity >= 1) org.scalajs.logging.Level.Info
+        else if (verbosity >= 0) org.scalajs.logging.Level.Warn
+        else org.scalajs.logging.Level.Error
+    )
+
   def scalaNativeTestLogger: sn.Logger =
     new sn.Logger {
       def trace(msg: Throwable) = ()

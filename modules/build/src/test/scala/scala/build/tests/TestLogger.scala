@@ -42,6 +42,8 @@ case class TestLogger(info: Boolean = true, debug: Boolean = false) extends Logg
 
   def bloopRifleLogger: BloopRifleLogger =
     BloopRifleLogger.nop
+  def scalaJsLogger: org.scalajs.logging.Logger =
+    org.scalajs.logging.NullLogger
   def scalaNativeTestLogger: sn.Logger =
     sn.Logger.nullLogger
   def scalaNativeCliInternalLoggerOptions: List[String] =
