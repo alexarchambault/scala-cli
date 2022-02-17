@@ -62,6 +62,7 @@ object Publish extends ScalaCommand[PublishOptions] {
         bloopRifleConfig,
         logger,
         crossBuilds = cross,
+        buildTests = false,
         partial = None,
         postAction = () => WatchUtil.printWatchMessage()
       ) { res =>
@@ -80,6 +81,7 @@ object Publish extends ScalaCommand[PublishOptions] {
           bloopRifleConfig,
           logger,
           crossBuilds = cross,
+          buildTests = false,
           partial = None
         ).orExit(logger)
       maybePublish(builds, workingDir, logger, allowExit = true)
