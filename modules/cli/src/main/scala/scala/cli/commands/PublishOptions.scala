@@ -80,7 +80,7 @@ final case class PublishOptions(
     val baseOptions = shared.buildOptions(enableJmh = false, jmhVersion = None)
     baseOptions.copy(
       mainClass = mainClass.mainClass.filter(_.nonEmpty),
-      notForBloopOptions = PostBuildOptions(
+      notForBloopOptions = baseOptions.notForBloopOptions.copy(
         publishOptions = baseOptions.notForBloopOptions.publishOptions.copy(
           organization = organization.map(_.trim).filter(_.nonEmpty).map(Positioned.commandLine(_)),
           name = moduleName.map(_.trim).filter(_.nonEmpty).map(Positioned.commandLine(_)),
