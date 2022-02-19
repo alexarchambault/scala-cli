@@ -269,21 +269,20 @@ abstract class CompileTestDefinitions(val scalaVersionOpt: Option[String])
           )
         )
     }
-  if (actualScalaVersion.startsWith("2.12"))
-    test("JVM options only for JVM platform") {
-      val inputs = TestInputs(
-        Seq(os.rel / "Main.scala" -> "//> using `java-opt` \"-Xss1g\"")
+  test("JVM options only for JVM platform") {
+    val inputs = TestInputs(
+      Seq(os.rel / "Main.scala" -> "//> using `java-opt` \"-Xss1g\"")
+    )
+    inputs.fromRoot { root =>
+      val res = os.proc(TestUtil.cli, "compile", extraOptions, "--native", ".").call(
+        cwd = root,
+        stderr = os.Pipe
       )
-      inputs.fromRoot { root =>
-        val res = os.proc(TestUtil.cli, "compile", extraOptions, "--native", ".").call(
-          cwd = root,
-          stderr = os.Pipe
-        )
-        val stderr = res.err.text()
-        expect(s"\\[.*warn.*\\].*Conflicting options.*".r.findFirstMatchIn(stderr).isDefined)
+      val stderr = res.err.text()
+      expect(s"\\[.*warn.*\\].*Conflicting options.*".r.findFirstMatchIn(stderr).isDefined)
 
-      }
     }
+  }
 
   test("Manual javac SemanticDB") {
     val inputs = TestInputs(

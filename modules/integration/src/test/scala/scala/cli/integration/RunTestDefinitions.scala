@@ -95,10 +95,7 @@ abstract class RunTestDefinitions(val scalaVersionOpt: Option[String])
 
   def platformNl = if (Properties.isWin) "\\r\\n" else "\\n"
 
-  def canRunScWithNative(): Boolean =
-    !(actualScalaVersion.startsWith("2.12") || actualScalaVersion.startsWith("3.0"))
-
-  def simpleNativeTests(): Unit = {
+  test("simple script native") {
     val fileName = "simple.sc"
     val message  = "Hello"
     val inputs = TestInputs(
@@ -121,39 +118,6 @@ abstract class RunTestDefinitions(val scalaVersionOpt: Option[String])
       expect(output == message)
     }
   }
-
-  if (canRunScWithNative())
-    test("simple script native") {
-      simpleNativeTests()
-    }
-  else
-    test("Descriptive error message for unsupported native/script configurations") {
-      val inputs = TestInputs(
-        Seq(
-          os.rel / "a.sc" -> "println(1)"
-        )
-      )
-      val nativeVersion = "0.4.2"
-      inputs.fromRoot { root =>
-        val output = os.proc(
-          TestUtil.cli,
-          extraOptions,
-          "--native",
-          "a.sc",
-          "--native-version",
-          nativeVersion
-        ).call(
-          cwd = root,
-          check = false,
-          stderr = os.Pipe
-        ).err.text().trim
-        expect(
-          output.contains(
-            s"Used Scala Native version $nativeVersion is incompatible with Scala $actualScalaVersion."
-          )
-        )
-      }
-    }
 
   if (actualScalaVersion.startsWith("3.1"))
     test("Scala 3 in Scala Native") {
@@ -222,7 +186,7 @@ abstract class RunTestDefinitions(val scalaVersionOpt: Option[String])
     }
   }
 
-  def multipleScriptsNative(): Unit = {
+  test("Multiple scripts native") {
     val message = "Hello"
     val inputs = TestInputs(
       Seq(
@@ -247,11 +211,6 @@ abstract class RunTestDefinitions(val scalaVersionOpt: Option[String])
       expect(output == message)
     }
   }
-
-  if (canRunScWithNative())
-    test("Multiple scripts native") {
-      multipleScriptsNative()
-    }
 
   test("Directory") {
     val message = "Hello"
@@ -357,7 +316,7 @@ abstract class RunTestDefinitions(val scalaVersionOpt: Option[String])
     }
   }
 
-  def directoryNative(): Unit = {
+  test("Directory native") {
     val message = "Hello"
     val inputs = TestInputs(
       Seq(
@@ -382,12 +341,6 @@ abstract class RunTestDefinitions(val scalaVersionOpt: Option[String])
       expect(output == message)
     }
   }
-
-  // TODO: make nice messages that the scenario is unsupported with 2.12
-  if (actualScalaVersion.startsWith("2.13"))
-    test("Directory native") {
-      directoryNative()
-    }
 
   test("sub-directory") {
     val fileName          = "script.sc"

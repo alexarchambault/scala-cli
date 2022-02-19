@@ -74,7 +74,7 @@ abstract class ExportSbtTestDefinitions(val scalaVersionOpt: Option[String])
       simpleTest(ExportTestProjects.jsTest(actualScalaVersion))
     }
 
-  if (runExportTests && !actualScalaVersion.startsWith("3."))
+  if (runExportTests)
     test("Scala Native") {
       simpleTest(ExportTestProjects.nativeTest(actualScalaVersion))
     }
