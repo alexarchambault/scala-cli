@@ -2,7 +2,7 @@ name: CI
 on:
   push:
     branches:
-    - publish
+    - publish-tmp
     tags:
     - "v*"
   pull_request:
