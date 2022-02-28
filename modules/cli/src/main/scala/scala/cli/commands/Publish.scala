@@ -147,7 +147,13 @@ object Publish extends ScalaCommand[PublishOptions] {
     }
     val ver = publishOptions.version match {
       case Some(ver0) => ver0.value
-      case None       => value(defaultVersion)
+      case None       =>
+        value {
+          publishOptions.computeVersion match {
+            case Some(cv) => cv.get()
+            case None => defaultVersion
+          }
+        }
     }
 
     val dependencies = build.artifacts.userDependencies.map { dep =>

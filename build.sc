@@ -190,6 +190,7 @@ class Build(val crossScalaVersion: String)
   def repositories = super.repositories ++ customRepositories
 
   def compileIvyDeps = super.compileIvyDeps() ++ Agg(
+    Deps.jsoniterScalaMacros,
     Deps.svm
   )
   def ivyDeps = super.ivyDeps() ++ Agg(
@@ -201,6 +202,8 @@ class Build(val crossScalaVersion: String)
       .exclude(("com.google.collections", "google-collections")),
     Deps.dependency,
     Deps.guava, // for coursierJvm / scalaJsEnvNodeJs, see above
+    Deps.jgit,
+    Deps.jsoniterScala,
     Deps.nativeTestRunner,
     Deps.nativeTools, // Used only for discovery methods. For linking, look for scala-native-cli
     Deps.osLib,

@@ -35,6 +35,9 @@ final case class PublishOptions(
   @HelpMessage("Version to publish artifacts as")
     version: Option[String] = None,
   @Group("Publishing")
+  @HelpMessage("How to compute the version to publish artifacts as")
+    computeVersion: Option[String] = None,
+  @Group("Publishing")
   @HelpMessage("URL to put in publishing metadata")
     url: Option[String] = None,
   @Group("Publishing")
@@ -148,6 +151,12 @@ final case class PublishOptions(
             signer
               .map(Positioned.commandLine(_))
               .map(BPublishOptions.parseSigner(_))
+              .sequence
+          },
+          computeVersion = value {
+            computeVersion
+              .map(Positioned.commandLine(_))
+              .map(BPublishOptions.parseComputeVersion(_))
               .sequence
           }
         )

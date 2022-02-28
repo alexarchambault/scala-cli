@@ -1,8 +1,14 @@
 package scala.build.options
 
+import com.github.plokhotnyuk.jsoniter_scala.core._
+import com.github.plokhotnyuk.jsoniter_scala.macros._
+import org.eclipse.jgit.api.Git
+
 import scala.build.Positioned
 import scala.build.errors.{BuildException, MalformedInputError}
 import scala.build.internal.Licenses
+import scala.io.Codec
+import scala.jdk.CollectionConverters._
 
 final case class PublishOptions(
   organization: Option[Positioned[String]] = None,
@@ -21,7 +27,8 @@ final case class PublishOptions(
   gpgOptions: List[String] = Nil,
   signer: Option[PublishOptions.Signer] = None,
   secretKey: Option[os.Path] = None,
-  secretKeyPassword: Option[Secret[String]] = None
+  secretKeyPassword: Option[Secret[String]] = None,
+  computeVersion: Option[PublishOptions.ComputeVersion] = None
 )
 
 object PublishOptions {
@@ -35,6 +42,32 @@ object PublishOptions {
   object Signer {
     case object Gpg          extends Signer
     case object BouncyCastle extends Signer
+  }
+
+  sealed abstract class ComputeVersion extends Product with Serializable {
+    def get(): Either[BuildException, String]
+  }
+  object ComputeVersion {
+    final case class Command(command: Seq[String]) extends ComputeVersion {
+      def get(): Either[BuildException, String] = {
+        val res = os.proc(command).call(stdin = os.Inherit, check = false)
+        if (res.exitCode == 0)
+          Right(res.out.trim(Codec.default))
+        else
+          Left(???)
+      }
+    }
+    case object GitTag  extends ComputeVersion {
+      def get(): Either[BuildException, String] = {
+        val git = Git.open(os.pwd.toIO)
+        val headCommit = git.log().call().asScala.iterator.next()
+        val resOrNull = git.describe().setTags(true).setTarget(headCommit).call()
+        if (resOrNull == null)
+          Left(???)
+        else
+          Right(resOrNull)
+      }
+    }
   }
 
   def parseSigner(input: Positioned[String]): Either[MalformedInputError, Signer] =
@@ -107,4 +140,41 @@ object PublishOptions {
             )
           )
       }
+
+  private lazy val commandCodec: JsonValueCodec[List[String]] =
+    JsonCodecMaker.make
+
+  def parseComputeVersion(input: Positioned[String]): Either[BuildException, ComputeVersion] =
+    if (input.value == "git" || input.value == "git:tag")
+      Right(ComputeVersion.GitTag)
+    else if (input.value.startsWith("command:["))
+      try {
+        val command = readFromString(input.value.stripPrefix("command:"))(commandCodec)
+        Right(ComputeVersion.Command(command))
+      }
+      catch {
+        case e: JsonReaderException =>
+          Left(
+            new MalformedInputError(
+              "compute-version",
+              input.value,
+              "git|git:tag|command:…",
+              input.positions,
+              cause = Some(e)
+            )
+          )
+      }
+    else if (input.value.startsWith("command:")) {
+      val command = input.value.stripPrefix("command:").split("\\s+").toSeq
+      Right(ComputeVersion.Command(command))
+    }
+    else
+      Left(
+        new MalformedInputError(
+          "compute-version",
+          input.value,
+          "git|git:tag|command:…",
+          input.positions
+        )
+      )
 }

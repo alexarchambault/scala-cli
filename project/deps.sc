@@ -72,6 +72,7 @@ object Deps {
   def dependency          = ivy"io.get-coursier::dependency:0.2.0"
   def expecty             = ivy"com.eed3si9n.expecty::expecty:0.15.4"
   def guava               = ivy"com.google.guava:guava:31.0.1-jre"
+  def jgit                = ivy"org.eclipse.jgit:org.eclipse.jgit:6.0.0.202111291000-r"
   def jimfs               = ivy"com.google.jimfs:jimfs:1.2"
   def jniUtils            = ivy"io.get-coursier.jniutils:windows-jni-utils:0.3.3"
   def jsoniterScala       = ivy"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-core:2.13.5"
