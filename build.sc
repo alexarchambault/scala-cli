@@ -292,6 +292,9 @@ class Build(val crossScalaVersion: String)
          |  def defaultScala213Version = "${Scala.scala213}"
          |
          |  def workspaceDirName = "$workspaceDirName"
+         |
+         |  def defaultGraalVMJavaVersion = ${deps.graalVmJavaVersion}
+         |  def defaultGraalVMVersion = "${deps.graalVmVersion}"
          |}
          |""".stripMargin
     if (!os.isFile(dest) || os.read(dest) != code)

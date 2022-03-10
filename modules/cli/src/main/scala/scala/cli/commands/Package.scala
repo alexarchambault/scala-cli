@@ -25,7 +25,7 @@ import scala.build.internal.{NativeBuilderHelper, Runner, ScalaJsConfig}
 import scala.build.options.{PackageType, Platform}
 import scala.cli.CurrentParams
 import scala.cli.commands.OptionsHelper._
-import scala.cli.errors.ScalaJsLinkingError
+import scala.cli.errors.{GraalVMNativeImageError, ScalaJsLinkingError}
 import scala.cli.internal.{ProcUtil, ScalaJsLinker}
 import scala.util.Properties
 
@@ -67,7 +67,8 @@ object Package extends ScalaCommand[PackageOptions] {
               options.output.filter(_.nonEmpty),
               options.force,
               s,
-              expectedModifyEpochSecondOpt
+              expectedModifyEpochSecondOpt,
+              args.unparsed
             )
               .orReport(logger)
             for (valueOpt <- mtimeDestPath)
@@ -95,7 +96,14 @@ object Package extends ScalaCommand[PackageOptions] {
           .orExit(logger)
       builds.main match {
         case s: Build.Successful =>
-          doPackage(logger, options.output.filter(_.nonEmpty), options.force, s, None)
+          doPackage(
+            logger,
+            options.output.filter(_.nonEmpty),
+            options.force,
+            s,
+            None,
+            args.unparsed
+          )
             .orExit(logger)
         case _: Build.Failed =>
           System.err.println("Compilation failed")
@@ -112,7 +120,8 @@ object Package extends ScalaCommand[PackageOptions] {
     outputOpt: Option[String],
     force: Boolean,
     build: Build.Successful,
-    expectedModifyEpochSecondOpt: Option[Long]
+    expectedModifyEpochSecondOpt: Option[Long],
+    extraArgs: Seq[String]
   ): Either[BuildException, Option[Long]] = either {
 
     // FIXME We'll probably need more refined rules if we start to support extra Scala.JS or Scala Native specific types
@@ -130,32 +139,34 @@ object Package extends ScalaCommand[PackageOptions] {
     // TODO When possible, call alreadyExistsCheck() before compiling stuff
 
     def extension = packageType match {
-      case PackageType.LibraryJar                 => ".jar"
-      case PackageType.SourceJar                  => ".jar"
-      case PackageType.Assembly                   => ".jar"
-      case PackageType.Js                         => ".js"
-      case PackageType.Debian                     => ".deb"
-      case PackageType.Dmg                        => ".dmg"
-      case PackageType.Pkg                        => ".pkg"
-      case PackageType.Rpm                        => ".rpm"
-      case PackageType.Msi                        => ".msi"
-      case PackageType.Native if Properties.isWin => ".exe"
-      case _ if Properties.isWin                  => ".bat"
-      case _                                      => ""
+      case PackageType.LibraryJar                             => ".jar"
+      case PackageType.SourceJar                              => ".jar"
+      case PackageType.Assembly                               => ".jar"
+      case PackageType.Js                                     => ".js"
+      case PackageType.Debian                                 => ".deb"
+      case PackageType.Dmg                                    => ".dmg"
+      case PackageType.Pkg                                    => ".pkg"
+      case PackageType.Rpm                                    => ".rpm"
+      case PackageType.Msi                                    => ".msi"
+      case PackageType.Native if Properties.isWin             => ".exe"
+      case PackageType.GraalVMNativeImage if Properties.isWin => ".exe"
+      case _ if Properties.isWin                              => ".bat"
+      case _                                                  => ""
     }
     def defaultName = packageType match {
-      case PackageType.LibraryJar                 => "library.jar"
-      case PackageType.SourceJar                  => "source.jar"
-      case PackageType.Assembly                   => "app.jar"
-      case PackageType.Js                         => "app.js"
-      case PackageType.Debian                     => "app.deb"
-      case PackageType.Dmg                        => "app.dmg"
-      case PackageType.Pkg                        => "app.pkg"
-      case PackageType.Rpm                        => "app.rpm"
-      case PackageType.Msi                        => "app.msi"
-      case PackageType.Native if Properties.isWin => "app.exe"
-      case _ if Properties.isWin                  => "app.bat"
-      case _                                      => "app"
+      case PackageType.LibraryJar                             => "library.jar"
+      case PackageType.SourceJar                              => "source.jar"
+      case PackageType.Assembly                               => "app.jar"
+      case PackageType.Js                                     => "app.js"
+      case PackageType.Debian                                 => "app.deb"
+      case PackageType.Dmg                                    => "app.dmg"
+      case PackageType.Pkg                                    => "app.pkg"
+      case PackageType.Rpm                                    => "app.rpm"
+      case PackageType.Msi                                    => "app.msi"
+      case PackageType.Native if Properties.isWin             => "app.exe"
+      case PackageType.GraalVMNativeImage if Properties.isWin => "app.exe"
+      case _ if Properties.isWin                              => "app.bat"
+      case _                                                  => "app"
     }
 
     val dest = outputOpt
@@ -216,6 +227,10 @@ object Package extends ScalaCommand[PackageOptions] {
 
       case PackageType.Native =>
         buildNative(build, destPath, value(mainClass), logger)
+
+      case PackageType.GraalVMNativeImage =>
+        buildGraalVMNativeImage(build, destPath, value(mainClass), extraArgs, logger)
+
       case nativePackagerType: PackageType.NativePackagerType =>
         val bootstrapPath = os.temp.dir(prefix = "scala-packager") / "app"
         bootstrap(build, bootstrapPath, value(mainClass), () => alreadyExistsCheck())
@@ -481,6 +496,19 @@ object Package extends ScalaCommand[PackageOptions] {
     buildNative(build, mainClass, destPath, workDir, logger)
   }
 
+  private def buildGraalVMNativeImage(
+    build: Build.Successful,
+    destPath: os.Path,
+    mainClass: String,
+    extraArgs: Seq[String],
+    logger: Logger
+  ): Unit = {
+    val workDir =
+      build.options.nativeImageWorkDir(build.inputs.workspace, build.inputs.projectName)
+
+    buildNativeImage(build, mainClass, destPath, workDir, extraArgs, logger)
+  }
+
   private def bootstrap(
     build: Build.Successful,
     destPath: os.Path,
@@ -669,5 +697,88 @@ object Package extends ScalaCommand[PackageOptions] {
         else
           throw new ScalaNativeBuildError
       }
+  }
+
+  private def ensureHasNativeImageCommand(
+    graalVMHome: os.Path,
+    logger: Logger
+  ): os.Path = {
+
+    val ext         = if (Properties.isWin) ".cmd" else ""
+    val nativeImage = graalVMHome / "bin" / s"native-image$ext"
+
+    if (os.exists(nativeImage))
+      logger.debug(s"$nativeImage found")
+    else {
+      val proc = os.proc(graalVMHome / "bin" / s"gu$ext", "install", "native-image")
+      logger.debug(s"$nativeImage not found, running ${proc.command.flatMap(_.value)}")
+      proc.call(stdin = os.Inherit, stdout = os.Inherit)
+      if (!os.exists(nativeImage))
+        logger.message(
+          s"Seems gu install command didn't install $nativeImage, trying to run it anyway"
+        )
+    }
+
+    nativeImage
+  }
+
+  def buildNativeImage(
+    build: Build.Successful,
+    mainClass: String,
+    dest: os.Path,
+    nativeImageWorkDir: os.Path,
+    extraOptions: Seq[String],
+    logger: Logger
+  ): Unit = {
+
+    os.makeDir.all(nativeImageWorkDir)
+
+    val jvmId = build.options.notForBloopOptions.packageOptions.nativeImageOptions.jvmId
+    val options = build.options.copy(
+      javaOptions = build.options.javaOptions.copy(
+        jvmIdOpt = Some(jvmId)
+      )
+    )
+
+    val javaHome = options.javaHome().value
+
+    val cacheData = NativeBuilderHelper.getCacheData(
+      build,
+      s"--java-home=${javaHome.javaHome.toString}" :: "--" :: extraOptions.toList,
+      dest,
+      nativeImageWorkDir
+    )
+
+    if (cacheData.changed)
+      withLibraryJar(build, dest.last.stripSuffix(".jar")) { mainJar =>
+
+        val classpath = build.fullClassPath.map(_.toString) :+ mainJar.toString()
+        val args = extraOptions ++ Seq(
+          s"-H:Path=${dest / os.up}",
+          s"-H:Name=${dest.last}",
+          "-cp",
+          classpath.mkString(File.pathSeparator),
+          mainClass
+        )
+
+        val nativeImageCommand = ensureHasNativeImageCommand(javaHome.javaHome, logger)
+
+        val exitCode = Runner.run(
+          "native-image",
+          nativeImageCommand.toString +: args,
+          logger,
+          cwd = Some(nativeImageWorkDir)
+        )
+        if (exitCode == 0)
+          NativeBuilderHelper.updateProjectAndOutputSha(
+            dest,
+            nativeImageWorkDir,
+            cacheData.projectSha
+          )
+        else
+          throw new GraalVMNativeImageError
+      }
+    else
+      logger.message("Found cached native image binary.")
   }
 }

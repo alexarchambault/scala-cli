@@ -15,7 +15,8 @@ final case class PackageOptions(
   debianOptions: DebianOptions = DebianOptions(),
   windowsOptions: WindowsOptions = WindowsOptions(),
   redHatOptions: RedHatOptions = RedHatOptions(),
-  dockerOptions: DockerOptions = DockerOptions()
+  dockerOptions: DockerOptions = DockerOptions(),
+  nativeImageOptions: NativeImageOptions = NativeImageOptions()
 ) {
 
   def packageVersion: String =

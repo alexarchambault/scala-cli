@@ -106,8 +106,9 @@ object Deps {
   val metaconfigTypesafe       = ivy"com.geirsson::metaconfig-typesafe-config:0.9.15"
 }
 
-private def graalVmVersion = "22.0.0"
-def graalVmJvmId           = s"graalvm-java17:$graalVmVersion"
+def graalVmVersion     = "22.0.0"
+def graalVmJavaVersion = 17
+def graalVmJvmId       = s"graalvm-java$graalVmJavaVersion:$graalVmVersion"
 
 def csDockerVersion = Deps.Versions.coursier
 

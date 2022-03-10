@@ -58,7 +58,11 @@ final case class PackageOptions(
     pkg: Boolean = false,
   @Group("Package")
   @HelpMessage("Build Docker image")
-    docker: Boolean = false
+    docker: Boolean = false,
+  @Group("Package")
+  @HelpMessage("Build GraalVM native image")
+  @ExtraName("graal")
+    nativeImage: Boolean = false
 ) {
   // format: on
   def packageTypeOpt: Option[PackageType] =
@@ -70,6 +74,7 @@ final case class PackageOptions(
     else if (pkg) Some(PackageType.Pkg)
     else if (rpm) Some(PackageType.Rpm)
     else if (msi) Some(PackageType.Msi)
+    else if (nativeImage) Some(PackageType.GraalVMNativeImage)
     else None
 
   def buildOptions: BuildOptions = {
@@ -111,6 +116,11 @@ final case class PackageOptions(
             imageRepository = packager.dockerImageRepository,
             imageTag = packager.dockerImageTag,
             isDockerEnabled = Some(docker)
+          ),
+          nativeImageOptions = NativeImageOptions(
+            graalvmJvmId = packager.graalvmJvmId.map(_.trim).filter(_.nonEmpty),
+            graalvmJavaVersion = packager.graalvmJavaVersion.filter(_ > 0),
+            graalvmVersion = packager.graalvmVersion.map(_.trim).filter(_.nonEmpty)
           )
         )
       )
