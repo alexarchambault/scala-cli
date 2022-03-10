@@ -63,7 +63,6 @@ object Package extends ScalaCommand[PackageOptions] {
         res.orReport(logger).map(_.main).foreach {
           case s: Build.Successful =>
             val mtimeDestPath = doPackage(
-              inputs,
               logger,
               options.output.filter(_.nonEmpty),
               options.force,
@@ -96,7 +95,7 @@ object Package extends ScalaCommand[PackageOptions] {
           .orExit(logger)
       builds.main match {
         case s: Build.Successful =>
-          doPackage(inputs, logger, options.output.filter(_.nonEmpty), options.force, s, None)
+          doPackage(logger, options.output.filter(_.nonEmpty), options.force, s, None)
             .orExit(logger)
         case _: Build.Failed =>
           System.err.println("Compilation failed")
@@ -109,7 +108,6 @@ object Package extends ScalaCommand[PackageOptions] {
   }
 
   private def doPackage(
-    inputs: Inputs,
     logger: Logger,
     outputOpt: Option[String],
     force: Boolean,
@@ -217,7 +215,7 @@ object Package extends ScalaCommand[PackageOptions] {
         value(buildJs(build, destPath, value(mainClass), logger))
 
       case PackageType.Native =>
-        buildNative(inputs, build, destPath, value(mainClass), logger)
+        buildNative(build, destPath, value(mainClass), logger)
       case nativePackagerType: PackageType.NativePackagerType =>
         val bootstrapPath = os.temp.dir(prefix = "scala-packager") / "app"
         bootstrap(build, bootstrapPath, value(mainClass), () => alreadyExistsCheck())
@@ -293,7 +291,7 @@ object Package extends ScalaCommand[PackageOptions] {
             WindowsPackage(windowsSettings).build()
         }
       case PackageType.Docker =>
-        docker(inputs, build, value(mainClass), logger)
+        docker(build, value(mainClass), logger)
     }
 
     if (packageType.runnable.nonEmpty)
@@ -400,7 +398,6 @@ object Package extends ScalaCommand[PackageOptions] {
   }
 
   private def docker(
-    inputs: Inputs,
     build: Build.Successful,
     mainClass: String,
     logger: Logger
@@ -444,7 +441,7 @@ object Package extends ScalaCommand[PackageOptions] {
     build.options.platform.value match {
       case Platform.JVM    => bootstrap(build, appPath, mainClass, () => ())
       case Platform.JS     => buildJs(build, appPath, mainClass, logger)
-      case Platform.Native => buildNative(inputs, build, appPath, mainClass, logger)
+      case Platform.Native => buildNative(build, appPath, mainClass, logger)
     }
 
     logger.message(
@@ -470,14 +467,16 @@ object Package extends ScalaCommand[PackageOptions] {
   }
 
   private def buildNative(
-    inputs: Inputs,
     build: Build.Successful,
     destPath: os.Path,
     mainClass: String,
     logger: Logger
   ): Unit = {
     val workDir =
-      build.options.scalaNativeOptions.nativeWorkDir(inputs.workspace, inputs.projectName)
+      build.options.scalaNativeOptions.nativeWorkDir(
+        build.inputs.workspace,
+        build.inputs.projectName
+      )
 
     buildNative(build, mainClass, destPath, workDir, logger)
   }
