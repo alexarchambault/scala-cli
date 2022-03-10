@@ -239,6 +239,9 @@ class Build(val crossScalaVersion: String)
     val detailedVersionValue =
       if (`local-repo`.developingOnStubModules) s"""Some("${vcsState()}")"""
       else "None"
+    val testRunnerOrganization = `test-runner`(Scala.defaultInternal)
+      .pomSettings()
+      .organization
     val code =
       s"""package scala.build.internal
          |
@@ -254,9 +257,7 @@ class Build(val crossScalaVersion: String)
          |  def stubsModuleName = "${stubs.artifactName()}"
          |  def stubsVersion = "${stubs.publishVersion()}"
          |
-         |  def testRunnerOrganization = "${`test-runner`(
-          Scala.defaultInternal
-        ).pomSettings().organization}"
+         |  def testRunnerOrganization = "$testRunnerOrganization"
          |  def testRunnerModuleName = "${`test-runner`(Scala.defaultInternal).artifactName()}"
          |  def testRunnerVersion = "${`test-runner`(Scala.defaultInternal).publishVersion()}"
          |  def testRunnerMainClass = "$testRunnerMainClass"
