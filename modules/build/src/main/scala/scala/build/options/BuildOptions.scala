@@ -159,10 +159,9 @@ final case class BuildOptions(
   lazy val finalCache = internal.cache.getOrElse(FileCache())
   // This might download a JVM if --jvm … is passed or no system JVM is installed
 
-  private lazy val javaCommand0: Positioned[JavaHomeInfo] = {
-    val javaHome = javaHomeLocation()
-    val ext      = if (Properties.isWin) ".exe" else ""
-    val javaCmd  = (javaHome.value / "bin" / s"java$ext").toString
+  private lazy val javaCommand0: Positioned[JavaHomeInfo] = javaHomeLocation().map { javaHome =>
+    val ext     = if (Properties.isWin) ".exe" else ""
+    val javaCmd = (javaHome / "bin" / s"java$ext").toString
 
     val javaVersionOutput = os.proc(javaCmd, "-version").call(
       cwd = os.pwd,
@@ -174,7 +173,7 @@ final case class BuildOptions(
       throw new Exception(s"Could not parse java version from output: $javaVersionOutput")
     }
 
-    Positioned(javaHome.positions, JavaHomeInfo(javaCmd, javaVersion))
+    JavaHomeInfo(javaCmd, javaVersion)
   }
 
   private def jvmIndexOs = javaOptions.jvmIndexOs.getOrElse(OsLibc.jvmIndexOs)
