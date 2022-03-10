@@ -173,7 +173,7 @@ final case class BuildOptions(
       throw new Exception(s"Could not parse java version from output: $javaVersionOutput")
     }
 
-    JavaHomeInfo(javaCmd, javaVersion)
+    JavaHomeInfo(javaHome, javaCmd, javaVersion)
   }
 
   private def jvmIndexOs = javaOptions.jvmIndexOs.getOrElse(OsLibc.jvmIndexOs)
@@ -740,7 +740,11 @@ object BuildOptions {
     platform: Platform
   )
 
-  final case class JavaHomeInfo(javaCommand: String, version: Int)
+  final case class JavaHomeInfo(
+    javaHome: os.Path,
+    javaCommand: String,
+    version: Int
+  )
 
   implicit val hasHashData: HasHashData[BuildOptions] = HasHashData.derive
   implicit val monoid: ConfigMonoid[BuildOptions]     = ConfigMonoid.derive
