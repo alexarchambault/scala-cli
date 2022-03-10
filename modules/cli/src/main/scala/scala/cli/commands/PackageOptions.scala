@@ -4,6 +4,7 @@ import caseapp._
 import caseapp.core.help.Help
 
 import scala.build.options._
+import scala.build.options.packaging._
 
 // format: off
 @HelpMessage("Compile and package Scala code")
