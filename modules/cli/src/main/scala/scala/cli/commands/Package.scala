@@ -18,6 +18,7 @@ import java.nio.file.{Files, Path}
 import java.util.jar.{Attributes => JarAttributes, JarOutputStream}
 import java.util.zip.{ZipEntry, ZipOutputStream}
 
+import scala.annotation.tailrec
 import scala.build.EitherCps.{either, value}
 import scala.build._
 import scala.build.errors.{BuildException, ScalaNativeBuildError}
@@ -801,7 +802,6 @@ object Package extends ScalaCommand[PackageOptions] {
      s"""chcp 437
         |@call "$vcvars"
         |if %errorlevel% neq 0 exit /b %errorlevel%
-        |where cl
         |@call ${escapedCommand.mkString(" ")}
         |""".stripMargin
     pprint.stderr.log(script)
@@ -818,6 +818,43 @@ object Package extends ScalaCommand[PackageOptions] {
     )
 
     res.exitCode
+  }
+
+  private def availableDriveLetter(): Char = {
+
+    @tailrec
+    def helper(from: Char): Char =
+      if (from > 'Z') sys.error("Cannot find free drive letter")
+      else {
+        val p = os.Path(s"$from:" + "\\")
+        if (os.exists(p)) helper((from + 1).toChar)
+        else from
+      }
+
+    helper('D')
+  }
+
+  private def maybeWithShorterGraalvmHome[T](
+    currentHome: os.Path
+  )(
+    f: os.Path => T
+  ): T = {
+    if (Properties.isWin && f.toString.length >= 180) {
+      val driveLetter = availableDriveLetter()
+      pprint.stderr.log(driveLetter)
+      val setupCommand = s"""subst $driveLetter: "$currentHome""""
+      val disableScript = s"""subst $driveLetter: /d"""
+
+      os.proc("cmd", "/c", setupCommand).call(stdin = os.Inherit, stdout = os.Inherit)
+      try {
+        f(os.Path(s"$driveLetter:" + "\\"))
+      }
+      finally {
+        os.proc("cmd", "/c", disableScript).call(stdin = os.Inherit, stdout = os.Inherit)
+      }
+    }
+    else
+      f(currentHome)
   }
 
   def buildNativeImage(
@@ -863,27 +900,32 @@ object Package extends ScalaCommand[PackageOptions] {
             mainClass
           )
 
-          val nativeImageCommand = ensureHasNativeImageCommand(javaHome.javaHome, logger)
-          val command = nativeImageCommand.toString +: args
+          maybeWithShorterGraalvmHome(javaHome.javaHome) { graalVMHome =>
 
-          val exitCode =
-            if (Properties.isWin)
-              vcvarsOpt match {
-                case Some(vcvars) =>
-                  runFromVcvarsBat(command, vcvars, nativeImageWorkDir)
-                case None =>
-                  Runner.run("unused", command, logger, cwd = Some(nativeImageWorkDir))
-              }
+            pprint.stderr.log(graalVMHome)
+
+            val nativeImageCommand = ensureHasNativeImageCommand(graalVMHome, logger)
+            val command = nativeImageCommand.toString +: args
+
+            val exitCode =
+              if (Properties.isWin)
+                vcvarsOpt match {
+                  case Some(vcvars) =>
+                    runFromVcvarsBat(command, vcvars, nativeImageWorkDir)
+                  case None =>
+                    Runner.run("unused", command, logger, cwd = Some(nativeImageWorkDir))
+                }
+              else
+                Runner.run("unused", command, logger, cwd = Some(nativeImageWorkDir))
+            if (exitCode == 0)
+              NativeBuilderHelper.updateProjectAndOutputSha(
+                dest,
+                nativeImageWorkDir,
+                cacheData.projectSha
+              )
             else
-              Runner.run("unused", command, logger, cwd = Some(nativeImageWorkDir))
-          if (exitCode == 0)
-            NativeBuilderHelper.updateProjectAndOutputSha(
-              dest,
-              nativeImageWorkDir,
-              cacheData.projectSha
-            )
-          else
-            throw new GraalVMNativeImageError
+              throw new GraalVMNativeImageError
+          }
         }
       }
     else
