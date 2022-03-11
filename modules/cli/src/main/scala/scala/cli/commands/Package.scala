@@ -843,12 +843,12 @@ object Package extends ScalaCommand[PackageOptions] {
     if (Properties.isWin && currentHome.toString.length >= 180) {
       val driveLetter = availableDriveLetter()
       pprint.stderr.log(driveLetter)
-      val setupCommand = s"""subst $driveLetter: "$currentHome""""
+      val setupCommand = s"""subst $driveLetter: "${currentHome / os.up}""""
       val disableScript = s"""subst $driveLetter: /d"""
 
       os.proc("cmd", "/c", setupCommand).call(stdin = os.Inherit, stdout = os.Inherit)
       try {
-        f(os.Path(s"$driveLetter:" + "\\"))
+        f(os.Path(s"$driveLetter:" + "\\") / currentHome.last)
       }
       finally {
         os.proc("cmd", "/c", disableScript).call(stdin = os.Inherit, stdout = os.Inherit)
