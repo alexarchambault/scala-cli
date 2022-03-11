@@ -801,8 +801,10 @@ object Package extends ScalaCommand[PackageOptions] {
      s"""chcp 437
         |@call "$vcvars"
         |if %errorlevel% neq 0 exit /b %errorlevel%
+        |where cl
         |@call ${escapedCommand.mkString(" ")}
         |""".stripMargin
+    pprint.stderr.log(script)
     val scriptPath = workingDir / "run-native-image.bat"
     os.write.over(scriptPath, script.getBytes, createFolders = true)
 
