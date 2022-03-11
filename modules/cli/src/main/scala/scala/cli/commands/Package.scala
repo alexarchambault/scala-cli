@@ -839,7 +839,8 @@ object Package extends ScalaCommand[PackageOptions] {
   )(
     f: os.Path => T
   ): T = {
-    if (Properties.isWin && f.toString.length >= 180) {
+    pprint.stderr.log(currentHome)
+    if (Properties.isWin && currentHome.toString.length >= 180) {
       val driveLetter = availableDriveLetter()
       pprint.stderr.log(driveLetter)
       val setupCommand = s"""subst $driveLetter: "$currentHome""""
