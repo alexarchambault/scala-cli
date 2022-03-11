@@ -805,6 +805,7 @@ object Package extends ScalaCommand[PackageOptions] {
         |@call ${escapedCommand.mkString(" ")}
         |""".stripMargin
     pprint.stderr.log(script)
+    pprint.stderr.log(sys.env.toVector.filter(_._1.toLowerCase(java.util.Locale.ROOT).contains("path")))
     val scriptPath = workingDir / "run-native-image.bat"
     os.write.over(scriptPath, script.getBytes, createFolders = true)
 
