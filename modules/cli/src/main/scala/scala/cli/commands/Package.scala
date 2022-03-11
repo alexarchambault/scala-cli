@@ -11,7 +11,7 @@ import packager.mac.pkg.PkgPackage
 import packager.rpm.RedHatPackage
 import packager.windows.WindowsPackage
 
-import java.io.{ByteArrayOutputStream, File}
+import java.io.{ByteArrayOutputStream, File, OutputStream}
 import java.nio.charset.StandardCharsets
 import java.nio.file.attribute.FileTime
 import java.nio.file.{Files, Path}
@@ -722,6 +722,100 @@ object Package extends ScalaCommand[PackageOptions] {
     nativeImage
   }
 
+  private def maybeWithManifestClassPath[T](
+    createManifest: Boolean,
+    classPath: Seq[os.Path]
+  )(
+    f: Seq[os.Path] => T
+  ): T = {
+    var toDeleteOpt = Option.empty[os.Path]
+
+    try {
+      val finalCp =
+        if (createManifest) {
+          import java.util.jar._
+          val manifest = new Manifest
+          val attributes = manifest.getMainAttributes
+          attributes.put(Attributes.Name.MANIFEST_VERSION, "1.0")
+          attributes.put(Attributes.Name.CLASS_PATH, classPath.map(_.toString).mkString(" "))
+          val jarFile = os.temp(prefix = "classpathJar", suffix = ".jar")
+          toDeleteOpt = Some(jarFile)
+          var os0: OutputStream = null
+          var jos: JarOutputStream = null
+          try {
+            os0 = os.write.outputStream(jarFile)
+            jos = new JarOutputStream(os0, manifest)
+          }
+          finally {
+            if (jos != null)
+              jos.close()
+            if (os0 != null)
+              os0.close()
+          }
+          Seq(jarFile)
+        } else
+          classPath
+
+      f(finalCp)
+    }
+    finally {
+      for (toDelete <- toDeleteOpt)
+        os.remove(toDelete)
+    }
+  }
+
+  private def vcVersions = Seq("2022", "2019", "2017")
+  private def vcEditions = Seq("Enterprise", "Community", "BuildTools")
+  lazy val vcvarsCandidates = Option(System.getenv("VCVARSALL")) ++ {
+    for {
+      isX86 <- Seq(false, true)
+      version <- vcVersions
+      edition <- vcEditions
+    } yield {
+      val programFiles = if (isX86) "Program Files (x86)" else "Program Files"
+      """C:\""" + programFiles + """\Microsoft Visual Studio\""" + version + "\\" + edition + """\VC\Auxiliary\Build\vcvars64.bat"""
+    }
+  }
+
+  private def vcvarsOpt: Option[os.Path] =
+    vcvarsCandidates
+      .iterator
+      .map(os.Path(_, os.pwd))
+      .filter(os.exists(_))
+      .take(1)
+      .toList
+      .headOption
+
+  private def runFromVcvarsBat(
+    command: Seq[String],
+    vcvars: os.Path,
+    workingDir: os.Path
+  ): Int = {
+    val escapedCommand = command.map {
+      case s if s.contains(" ") => "\"" + s + "\""
+      case s => s
+    }
+    // chcp 437 sometimes needed, see https://github.com/oracle/graal/issues/2522
+    val script =
+     s"""chcp 437
+        |@call "$vcvars"
+        |if %errorlevel% neq 0 exit /b %errorlevel%
+        |@call ${escapedCommand.mkString(" ")}
+        |""".stripMargin
+    val scriptPath = workingDir / "run-native-image.bat"
+    os.write.over(scriptPath, script.getBytes, createFolders = true)
+
+    val finalCommand = Seq("cmd", "/c", scriptPath.toString)
+    val res = os.proc(finalCommand).call(
+      cwd = workingDir,
+      check = false,
+      stdin = os.Inherit,
+      stdout = os.Inherit
+    )
+
+    res.exitCode
+  }
+
   def buildNativeImage(
     build: Build.Successful,
     mainClass: String,
@@ -752,31 +846,41 @@ object Package extends ScalaCommand[PackageOptions] {
     if (cacheData.changed)
       withLibraryJar(build, dest.last.stripSuffix(".jar")) { mainJar =>
 
-        val classpath = build.fullClassPath.map(_.toString) :+ mainJar.toString()
-        val args = extraOptions ++ Seq(
-          s"-H:Path=${dest / os.up}",
-          s"-H:Name=${dest.last}",
-          "-cp",
-          classpath.mkString(File.pathSeparator),
-          mainClass
-        )
-
-        val nativeImageCommand = ensureHasNativeImageCommand(javaHome.javaHome, logger)
-
-        val exitCode = Runner.run(
-          "native-image",
-          nativeImageCommand.toString +: args,
-          logger,
-          cwd = Some(nativeImageWorkDir)
-        )
-        if (exitCode == 0)
-          NativeBuilderHelper.updateProjectAndOutputSha(
-            dest,
-            nativeImageWorkDir,
-            cacheData.projectSha
+        val originalClasspath = build.fullClassPath :+ mainJar
+        maybeWithManifestClassPath(
+          createManifest = Properties.isWin,
+          classPath = originalClasspath.map(os.Path(_, os.pwd))
+        ) { classPath =>
+          val args = extraOptions ++ Seq(
+            s"-H:Path=${dest / os.up}",
+            s"-H:Name=${dest.last}",
+            "-cp",
+            classPath.map(_.toString).mkString(File.pathSeparator),
+            mainClass
           )
-        else
-          throw new GraalVMNativeImageError
+
+          val nativeImageCommand = ensureHasNativeImageCommand(javaHome.javaHome, logger)
+          val command = nativeImageCommand.toString +: args
+
+          val exitCode =
+            if (Properties.isWin)
+              vcvarsOpt match {
+                case Some(vcvars) =>
+                  runFromVcvarsBat(command, vcvars, nativeImageWorkDir)
+                case None =>
+                  Runner.run("unused", command, logger, cwd = Some(nativeImageWorkDir))
+              }
+            else
+              Runner.run("unused", command, logger, cwd = Some(nativeImageWorkDir))
+          if (exitCode == 0)
+            NativeBuilderHelper.updateProjectAndOutputSha(
+              dest,
+              nativeImageWorkDir,
+              cacheData.projectSha
+            )
+          else
+            throw new GraalVMNativeImageError
+        }
       }
     else
       logger.message("Found cached native image binary.")
