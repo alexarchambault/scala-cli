@@ -791,6 +791,7 @@ object Package extends ScalaCommand[PackageOptions] {
     vcvars: os.Path,
     workingDir: os.Path
   ): Int = {
+    pprint.stderr.log(vcvars)
     val escapedCommand = command.map {
       case s if s.contains(" ") => "\"" + s + "\""
       case s => s
