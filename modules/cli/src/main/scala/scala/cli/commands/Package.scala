@@ -895,7 +895,7 @@ object Package extends ScalaCommand[PackageOptions] {
         ) { classPath =>
           val args = extraOptions ++ Seq(
             s"-H:Path=${dest / os.up}",
-            s"-H:Name=${dest.last}",
+            s"-H:Name=${dest.last.stripSuffix(".exe")}", // FIXME Case-insensitive strip suffix?
             "-cp",
             classPath.map(_.toString).mkString(File.pathSeparator),
             mainClass
@@ -918,12 +918,14 @@ object Package extends ScalaCommand[PackageOptions] {
                 }
               else
                 Runner.run("unused", command, logger, cwd = Some(nativeImageWorkDir))
-            if (exitCode == 0)
+            if (exitCode == 0) {
+              val actualDest = if (dest.last.endsWith(".exe")) dest else dest / os.up / s"${dest.last}.exe"
               NativeBuilderHelper.updateProjectAndOutputSha(
-                dest,
+                actualDest,
                 nativeImageWorkDir,
                 cacheData.projectSha
               )
+            }
             else
               throw new GraalVMNativeImageError
           }
