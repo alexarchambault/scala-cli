@@ -202,7 +202,7 @@ trait CliLaunchers extends SbtModule { self =>
 
   trait CliNativeImage extends NativeImage {
     def nativeImageCsCommand    = Seq(cs())
-    def nativeImagePersist      = System.getenv("CI") != null
+    def nativeImagePersist      = true
     def nativeImageGraalVmJvmId = deps.graalVmJvmId
     def nativeImageOptions = T {
       val usesDocker = nativeImageDockerParams().nonEmpty
