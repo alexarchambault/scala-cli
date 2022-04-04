@@ -130,7 +130,7 @@ class CliLogger(
   def coursierLogger(printBefore: String) =
     if (quiet)
       CacheLogger.nop
-    else if (progress.getOrElse(coursier.paths.Util.useAnsiOutput()))
+    else if (pprint.err.log(progress).getOrElse(pprint.err.log(coursier.paths.Util.useAnsiOutput())))
       RefreshLogger.create(
         CustomProgressBarRefreshDisplay.create(
           keepOnScreen = verbosity >= 1,
