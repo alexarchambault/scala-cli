@@ -2,7 +2,6 @@ package scala.build.bsp
 
 import ch.epfl.scala.{bsp4j => b}
 import com.swoval.files.PathWatchers
-import dependency.ScalaParameters
 import org.eclipse.lsp4j.jsonrpc
 
 import java.io.{InputStream, OutputStream}
@@ -11,7 +10,7 @@ import java.util.concurrent.{CompletableFuture, Executor}
 import scala.build.EitherCps.{either, value}
 import scala.build._
 import scala.build.blooprifle.BloopRifleConfig
-import scala.build.errors.{BuildException, Diagnostic}
+import scala.build.errors.BuildException
 import scala.build.internal.CustomCodeWrapper
 import scala.build.options.{BuildOptions, Scope}
 import scala.collection.mutable.ListBuffer
@@ -30,9 +29,6 @@ final class BspImpl(
   in: InputStream,
   out: OutputStream
 ) extends Bsp {
-
-  import BspImpl.PreBuildData
-
   def notifyBuildChange(): Unit = {
     val events =
       for (targetId <- bspServerProxy.targetIds)
@@ -44,12 +40,6 @@ final class BspImpl(
     val params = new b.DidChangeBuildTarget(events.asJava)
     actualLocalClient.onBuildTargetDidChange(params)
   }
-
-  private case class PreBuildProject(
-    mainScope: PreBuildData,
-    testScope: PreBuildData,
-    diagnostics: Seq[Diagnostic]
-  )
 
   private def prepareBuild(): Either[(BuildException, Scope), PreBuildProject] = either {
     logger.log("Preparing build")
@@ -305,7 +295,8 @@ final class BspImpl(
       compile(threads.prepareBuildExecutor, doCompile),
     logger = logger,
     initialInputs = initialInputs,
-    argsToInputs = argsToInputs
+    argsToInputs = argsToInputs,
+    prepareBuild = () => prepareBuild()
   )
   
 
@@ -417,15 +408,4 @@ object BspImpl {
     def setGeneratedSources(scope: Scope, newGeneratedSources: Seq[GeneratedSource]) =
       underlying.setGeneratedSources(scope, newGeneratedSources)
   }
-
-  private final case class PreBuildData(
-    sources: Sources,
-    buildOptions: BuildOptions,
-    classesDir: os.Path,
-    scalaParams: ScalaParameters,
-    artifacts: Artifacts,
-    project: Project,
-    generatedSources: Seq[GeneratedSource],
-    buildChanged: Boolean
-  )
 }
