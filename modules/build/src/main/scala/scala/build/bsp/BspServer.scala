@@ -29,8 +29,8 @@ class BspServer(
   setProjectName(inputs.workspace, mainProjectName, Scope.Main)
   setProjectName(inputs.workspace, testProjectName, Scope.Test)
 
-  private var client: Option[BuildClient] = None
-  private val isIntelliJ: AtomicBoolean   = new AtomicBoolean(false)
+  var client: Option[BuildClient]       = None
+  private val isIntelliJ: AtomicBoolean = new AtomicBoolean(false)
 
   def testProjectName: String = s"${inputs.projectName}-test"
   def mainProjectName: String = inputs.projectName
