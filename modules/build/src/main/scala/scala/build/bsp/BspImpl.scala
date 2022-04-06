@@ -55,10 +55,12 @@ final class BspImpl(
     logger.log("Preparing build")
 
     val persistentLogger = new PersistentDiagnosticLogger(logger)
+    val currentBspServer = bspServerProxy.currentBspServer
+    val inputs           = currentBspServer.inputs
 
     val crossSources = value {
       CrossSources.forInputs(
-        initialInputs,
+        inputs,
         Sources.defaultPreprocessors(
           buildOptions.scriptOptions.codeWrapper.getOrElse(CustomCodeWrapper)
         ),
@@ -84,18 +86,17 @@ final class BspImpl(
     val options0Test = sourcesTest.buildOptions.orElse(options0Main)
 
     val generatedSourcesMain =
-      sourcesMain.generateSources(initialInputs.generatedSrcRoot(Scope.Main))
+      sourcesMain.generateSources(inputs.generatedSrcRoot(Scope.Main))
     val generatedSourcesTest =
-      sourcesTest.generateSources(initialInputs.generatedSrcRoot(Scope.Test))
+      sourcesTest.generateSources(inputs.generatedSrcRoot(Scope.Test))
 
-    val currentBspServer = bspServerProxy.currentBspServer
     currentBspServer.setExtraDependencySources(buildOptions.classPathOptions.extraSourceJars)
     currentBspServer.setGeneratedSources(Scope.Main, generatedSourcesMain)
     currentBspServer.setGeneratedSources(Scope.Test, generatedSourcesTest)
 
     val (classesDir0Main, scalaParamsMain, artifactsMain, projectMain, buildChangedMain) = value {
       val res = Build.prepareBuild(
-        initialInputs,
+        inputs,
         sourcesMain,
         generatedSourcesMain,
         options0Main,
@@ -109,7 +110,7 @@ final class BspImpl(
 
     val (classesDir0Test, scalaParamsTest, artifactsTest, projectTest, buildChangedTest) = value {
       val res = Build.prepareBuild(
-        initialInputs,
+        inputs,
         sourcesTest,
         generatedSourcesTest,
         options0Test,
@@ -154,7 +155,7 @@ final class BspImpl(
   ): Either[(BuildException, Scope), Unit] = {
     def doBuildOnce(data: PreBuildData, scope: Scope) =
       Build.buildOnce(
-        initialInputs,
+        bspServerProxy.currentBspServer.inputs,
         data.sources,
         data.generatedSources,
         data.buildOptions,
@@ -236,10 +237,10 @@ final class BspImpl(
           def doPostProcess(data: PreBuildData, scope: Scope): Unit =
             Build.postProcess(
               data.generatedSources,
-              initialInputs.generatedSrcRoot(scope),
+              bspServerProxy.currentBspServer.inputs.generatedSrcRoot(scope),
               data.classesDir,
               logger,
-              initialInputs.workspace,
+              bspServerProxy.currentBspServer.inputs.workspace,
               updateSemanticDbs = true,
               scalaVersion = data.project.scalaCompiler.scalaVersion
             ).left.foreach(_.foreach(showGlobalWarningOnce))
@@ -260,7 +261,7 @@ final class BspImpl(
   }
 
   def registerWatchInputs(watcher: Build.Watcher): Unit =
-    initialInputs.elements.foreach {
+    bspServerProxy.currentBspServer.inputs.elements.foreach {
       case elem: Inputs.OnDisk =>
         val eventFilter: PathWatchers.Event => Boolean = { event =>
           val newOrDeletedFile =
