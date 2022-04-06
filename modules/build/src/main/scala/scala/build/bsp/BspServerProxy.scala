@@ -2,6 +2,7 @@ package scala.build.bsp
 
 import ch.epfl.scala.bsp4j as b
 import com.github.plokhotnyuk.jsoniter_scala.core.{readFromArray, JsonReaderException}
+import org.eclipse.lsp4j.jsonrpc.messages.ResponseError
 
 import java.util.concurrent.CompletableFuture
 
@@ -51,13 +52,19 @@ class BspServerProxy(
           else reloadBsp(previousInputs, newInputs)
         }
         thing match {
-          case Left(_) =>
-            CompletableFuture.completedFuture(res) // TODO return a proper json-rpc error message
+          case Left(errorMessage) =>
+            CompletableFuture.completedFuture(
+              responseError(s"Workspace reload failed, couldn't load sources: $errorMessage")
+            )
           case Right(r) => r
         }
       }
       else
-        CompletableFuture.completedFuture(res)
+        CompletableFuture.completedFuture(
+          responseError(
+            s"Workspace reload failed, inputs file missing from workspace directory: ${ideInputsJsonPath.toString()}"
+          )
+        )
     }
 
   private def reloadBsp(
@@ -69,8 +76,14 @@ class BspServerProxy(
     currentBspServer = createBspServer(currentBloopCompiler, newInputs)
     val newTargetIds = currentBspServer.targetIds
     prepareBuild() match {
-      case Left((_, _)) =>
-        CompletableFuture.completedFuture(new Object()) // TODO add proper error handling
+      case Left((buildException, scope)) =>
+        CompletableFuture.completedFuture(
+          new ResponseError(
+            JsonRpcErrorCodes.InternalError,
+            s"Can't reload workspace, build failed for scope: ${scope.name}: ${buildException.message}",
+            new Object()
+          )
+        )
       case Right(preBuildProject) =>
         if (previousInputs.projectName != preBuildProject.mainScope.project.projectName) {
           val events = newTargetIds.map(buildTargetIdToEvent(_, b.BuildTargetEventKind.CREATED)) ++
@@ -111,4 +124,10 @@ class BspServerProxy(
     event.setKind(eventKind)
     event
   }
+
+  private def responseError(
+    message: String,
+    errorCode: Int = JsonRpcErrorCodes.InternalError
+  ): ResponseError =
+    new ResponseError(errorCode, message, new Object())
 }
