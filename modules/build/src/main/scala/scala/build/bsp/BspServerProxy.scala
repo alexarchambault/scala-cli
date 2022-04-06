@@ -32,40 +32,39 @@ class BspServerProxy(
   localClient.onConnectWithServer(currentBloopCompiler.bloopServer.server)
   var currentBspServer: BspServer = createBspServer(currentBloopCompiler, initialInputs)
 
-  override def workspaceReload(): CompletableFuture[AnyRef] =
-    super.workspaceReload().thenCompose { res =>
-      val ideInputsJsonPath =
-        currentBspServer.workspace / Constants.workspaceDirName / "ide-inputs.json"
-      if (os.isFile(ideInputsJsonPath)) {
-        val thing = either[String] {
-          val ideInputs = value {
-            try Right(readFromArray(os.read.bytes(ideInputsJsonPath))(IdeInputs.codec))
-            catch {
-              case e: JsonReaderException =>
-                logger.debug(s"Caught $e while decoding $ideInputsJsonPath")
-                Left(e.getMessage)
-            }
+  override def workspaceReload(): CompletableFuture[AnyRef] = {
+    val ideInputsJsonPath =
+      currentBspServer.workspace / Constants.workspaceDirName / "ide-inputs.json"
+    if (os.isFile(ideInputsJsonPath)) {
+      val thing = either[String] {
+        val ideInputs = value {
+          try Right(readFromArray(os.read.bytes(ideInputsJsonPath))(IdeInputs.codec))
+          catch {
+            case e: JsonReaderException =>
+              logger.debug(s"Caught $e while decoding $ideInputsJsonPath")
+              Left(e.getMessage)
           }
-          val newInputs = value(argsToInputs(ideInputs.args))
-          val previousInputs = currentBspServer.inputs
-          if (newInputs == previousInputs) CompletableFuture.completedFuture(res)
-          else reloadBsp(previousInputs, newInputs)
         }
-        thing match {
-          case Left(errorMessage) =>
-            CompletableFuture.completedFuture(
-              responseError(s"Workspace reload failed, couldn't load sources: $errorMessage")
-            )
-          case Right(r) => r
-        }
+        val newInputs = value(argsToInputs(ideInputs.args))
+        val previousInputs = currentBspServer.inputs
+        if (newInputs == previousInputs) CompletableFuture.completedFuture(new Object)
+        else reloadBsp(previousInputs, newInputs)
       }
-      else
-        CompletableFuture.completedFuture(
-          responseError(
-            s"Workspace reload failed, inputs file missing from workspace directory: ${ideInputsJsonPath.toString()}"
+      thing match {
+        case Left(errorMessage) =>
+          CompletableFuture.completedFuture(
+            responseError(s"Workspace reload failed, couldn't load sources: $errorMessage")
           )
-        )
+        case Right(r) => r
+      }
     }
+    else
+      CompletableFuture.completedFuture(
+        responseError(
+          s"Workspace reload failed, inputs file missing from workspace directory: ${ideInputsJsonPath.toString()}"
+        )
+      )
+  }
 
   private def reloadBsp(
     previousInputs: Inputs,
