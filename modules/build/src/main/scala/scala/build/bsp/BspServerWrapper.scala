@@ -4,12 +4,13 @@ import ch.epfl.scala.{bsp4j => b}
 
 import java.util.concurrent.CompletableFuture
 
+import scala.build.GeneratedSource
 import scala.build.bloop.ScalaDebugServer
 import scala.build.options.Scope
 import scala.concurrent.Future
 
 trait BspServerWrapper extends b.BuildServer with b.ScalaBuildServer with b.JavaBuildServer
-    with ScalaDebugServer with ScalaScriptBuildServer {
+    with ScalaDebugServer with ScalaScriptBuildServer with HasGeneratedSources {
   def currentBspServer: BspServer
   override def buildInitialize(params: b.InitializeBuildParams)
     : CompletableFuture[b.InitializeBuildResult] = currentBspServer.buildInitialize(params)
@@ -80,5 +81,10 @@ trait BspServerWrapper extends b.BuildServer with b.ScalaBuildServer with b.Java
   def targetIds: List[b.BuildTargetIdentifier] = currentBspServer.targetIds
   def targetScopeIdOpt(scope: Scope): Option[b.BuildTargetIdentifier] =
     currentBspServer.targetScopeIdOpt(scope)
+  def setGeneratedSources(scope: Scope, sources: Seq[GeneratedSource]): Unit =
+    currentBspServer.setGeneratedSources(scope, sources)
+  def setProjectName(workspace: os.Path, name: String, scope: Scope): Unit =
+    currentBspServer.setProjectName(workspace, name, scope)
+
   def initiateShutdown: Future[Unit] = currentBspServer.initiateShutdown
 }

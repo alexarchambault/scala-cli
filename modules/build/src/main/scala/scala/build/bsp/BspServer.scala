@@ -25,7 +25,7 @@ class BspServer(
 ) extends b.BuildServer with b.ScalaBuildServer with b.JavaBuildServer with BuildServerForwardStubs
     with ScalaScriptBuildServer
     with ScalaDebugServerForwardStubs
-    with ScalaBuildServerForwardStubs with JavaBuildServerForwardStubs with HasGeneratedSources {
+    with ScalaBuildServerForwardStubs with JavaBuildServerForwardStubs with HasGeneratedSourcesImpl {
   setProjectName(inputs.workspace, mainProjectName, Scope.Main)
   setProjectName(inputs.workspace, testProjectName, Scope.Test)
 
