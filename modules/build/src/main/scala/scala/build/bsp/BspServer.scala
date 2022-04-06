@@ -9,10 +9,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.{CompletableFuture, TimeUnit}
 import java.{util => ju}
 
-import scala.build.Logger
 import scala.build.bloop.{ScalaDebugServer, ScalaDebugServerForwardStubs}
 import scala.build.internal.Constants
 import scala.build.options.Scope
+import scala.build.{Inputs, Logger}
 import scala.concurrent.{Future, Promise}
 import scala.jdk.CollectionConverters._
 import scala.util.Random
@@ -20,14 +20,21 @@ import scala.util.Random
 class BspServer(
   bloopServer: b.BuildServer with b.ScalaBuildServer with b.JavaBuildServer with ScalaDebugServer,
   compile: (() => CompletableFuture[b.CompileResult]) => CompletableFuture[b.CompileResult],
-  logger: Logger
+  logger: Logger,
+  val inputs: Inputs
 ) extends b.BuildServer with b.ScalaBuildServer with b.JavaBuildServer with BuildServerForwardStubs
     with ScalaScriptBuildServer
     with ScalaDebugServerForwardStubs
     with ScalaBuildServerForwardStubs with JavaBuildServerForwardStubs with HasGeneratedSources {
+  setProjectName(inputs.workspace, mainProjectName, Scope.Main)
+  setProjectName(inputs.workspace, testProjectName, Scope.Test)
 
   private var client: Option[BuildClient] = None
   private val isIntelliJ: AtomicBoolean   = new AtomicBoolean(false)
+
+  def testProjectName: String = s"${inputs.projectName}-test"
+  def mainProjectName: String = inputs.projectName
+  def workspace: os.Path      = inputs.workspace
 
   override def onConnectWithClient(client: BuildClient): Unit = this.client = Some(client)
 

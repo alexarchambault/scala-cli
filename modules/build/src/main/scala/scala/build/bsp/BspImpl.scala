@@ -35,9 +35,9 @@ final class BspImpl(
 
   import BspImpl.PreBuildData
 
-  def notifyBuildChange(actualLocalServer: BspServer): Unit = {
+  def notifyBuildChange(bspServerProxy: BspServerProxy): Unit = {
     val events =
-      for (targetId <- actualLocalServer.targetIds)
+      for (targetId <- bspServerProxy.targetIds)
         yield {
           val event = new b.BuildTargetEvent(targetId)
           event.setKind(b.BuildTargetEventKind.CHANGED)
@@ -54,7 +54,7 @@ final class BspImpl(
   )
 
   private def prepareBuild(
-    actualLocalServer: BspServer,
+    bspServerProxy: BspServerProxy,
     compiler: ScalaCompiler
   ): Either[(BuildException, Scope), PreBuildProject] = either {
     logger.log("Preparing build")
@@ -91,9 +91,10 @@ final class BspImpl(
     val generatedSourcesMain = sourcesMain.generateSources(inputs.generatedSrcRoot(Scope.Main))
     val generatedSourcesTest = sourcesTest.generateSources(inputs.generatedSrcRoot(Scope.Test))
 
-    actualLocalServer.setExtraDependencySources(buildOptions.classPathOptions.extraSourceJars)
-    actualLocalServer.setGeneratedSources(Scope.Main, generatedSourcesMain)
-    actualLocalServer.setGeneratedSources(Scope.Test, generatedSourcesTest)
+    val currentBspServer = bspServerProxy.currentBspServer
+    currentBspServer.setExtraDependencySources(buildOptions.classPathOptions.extraSourceJars)
+    currentBspServer.setGeneratedSources(Scope.Main, generatedSourcesMain)
+    currentBspServer.setGeneratedSources(Scope.Test, generatedSourcesTest)
 
     val (classesDir0Main, scalaParamsMain, artifactsMain, projectMain, buildChangedMain) = value {
       val res = Build.prepareBuild(
@@ -152,7 +153,7 @@ final class BspImpl(
   }
 
   private def buildE(
-    actualLocalServer: BspServer,
+    bspServerProxy: BspServerProxy,
     compiler: ScalaCompiler,
     notifyChanges: Boolean
   ): Either[(BuildException, Scope), Unit] = {
@@ -170,10 +171,10 @@ final class BspImpl(
       ).left.map(_ -> scope)
 
     for {
-      preBuild <- prepareBuild(actualLocalServer, compiler)
+      preBuild <- prepareBuild(bspServerProxy, compiler)
       _ = {
         if (notifyChanges && (preBuild.mainScope.buildChanged || preBuild.testScope.buildChanged))
-          notifyBuildChange(actualLocalServer)
+          notifyBuildChange(bspServerProxy)
       }
       _ <- doBuildOnce(preBuild.mainScope, Scope.Main)
       _ <- doBuildOnce(preBuild.testScope, Scope.Test)
@@ -181,18 +182,18 @@ final class BspImpl(
   }
 
   private def build(
-    actualLocalServer: BspServer,
+    bspServerProxy: BspServerProxy,
     compiler: ScalaCompiler,
     client: BspClient,
     notifyChanges: Boolean,
     logger: Logger
   ): Unit =
-    buildE(actualLocalServer, compiler, notifyChanges) match {
+    buildE(bspServerProxy, compiler, notifyChanges) match {
       case Left((ex, scope)) =>
-        client.reportBuildException(actualLocalServer.targetScopeIdOpt(scope), ex)
+        client.reportBuildException(bspServerProxy.targetScopeIdOpt(scope), ex)
         logger.debug(s"Caught $ex during BSP build, ignoring it")
       case Right(()) =>
-        for (targetId <- actualLocalServer.targetIds)
+        for (targetId <- bspServerProxy.targetIds)
           client.resetBuildExceptionDiagnostics(targetId)
     }
 
@@ -209,16 +210,16 @@ final class BspImpl(
     )
 
   def compile(
-    actualLocalServer: BspServer,
+    bspServerProxy: BspServerProxy,
     executor: Executor,
     doCompile: () => CompletableFuture[b.CompileResult]
   ): CompletableFuture[b.CompileResult] = {
     val preBuild = CompletableFuture.supplyAsync(
       () =>
-        prepareBuild(actualLocalServer, remoteServer) match {
+        prepareBuild(bspServerProxy, remoteServer) match {
           case Right(preBuild) =>
             if (preBuild.mainScope.buildChanged || preBuild.testScope.buildChanged)
-              notifyBuildChange(actualLocalServer)
+              notifyBuildChange(bspServerProxy)
             Right(preBuild)
           case Left((ex, scope)) =>
             Left((ex, scope))
@@ -229,15 +230,15 @@ final class BspImpl(
     preBuild.thenCompose { maybeParams =>
       maybeParams match {
         case Left((ex, scope)) =>
-          actualLocalClient.reportBuildException(actualLocalServer.targetScopeIdOpt(scope), ex)
+          actualLocalClient.reportBuildException(bspServerProxy.targetScopeIdOpt(scope), ex)
           CompletableFuture.completedFuture(
             new b.CompileResult(b.StatusCode.ERROR)
           )
         case Right(params) =>
-          for (targetId <- actualLocalServer.targetIds)
+          for (targetId <- bspServerProxy.targetIds)
             actualLocalClient.resetBuildExceptionDiagnostics(targetId)
 
-          val targetId = actualLocalServer.targetIds.head
+          val targetId = bspServerProxy.targetIds.head
           params.diagnostics.foreach(actualLocalClient.reportDiagnosticForFiles(targetId))
 
           doCompile().thenCompose { res =>
@@ -304,13 +305,13 @@ final class BspImpl(
     else
       actualLocalClient
 
-  var remoteServer: BloopCompiler  = null
-  var actualLocalServer: BspServer = null
+  var remoteServer: BloopCompiler    = _
+  var bspServerProxy: BspServerProxy = _
 
   val watcher = new Build.Watcher(
     ListBuffer(),
     threads.buildThreads.fileWatcher,
-    build(actualLocalServer, remoteServer, actualLocalClient, notifyChanges = true, logger),
+    build(bspServerProxy, remoteServer, actualLocalClient, notifyChanges = true, logger),
     ()
   )
 
@@ -337,22 +338,21 @@ final class BspImpl(
     }
     localClient.onConnectWithServer(remoteServer.bloopServer.server)
 
-    actualLocalServer =
-      new BspServer(
+    bspServerProxy =
+      new BspServerProxy(
         remoteServer.bloopServer.server,
         compile = doCompile =>
-          compile(actualLocalServer, threads.prepareBuildExecutor, doCompile),
-        logger = logger
+          compile(bspServerProxy, threads.prepareBuildExecutor, doCompile),
+        logger = logger,
+        initialInputs = inputs
       )
-    actualLocalServer.setProjectName(inputs.workspace, inputs.projectName, Scope.Main)
-    actualLocalServer.setProjectName(inputs.workspace, inputs.projectName + "-test", Scope.Test)
 
     val localServer
       : b.BuildServer with b.ScalaBuildServer with b.JavaBuildServer with ScalaScriptBuildServer =
       if (verbosity >= 3)
-        new LoggingBuildServerAll(actualLocalServer)
+        new LoggingBuildServerAll(bspServerProxy)
       else
-        actualLocalServer
+        bspServerProxy
 
     val launcher = new jsonrpc.Launcher.Builder[b.BuildClient]()
       .setExecutorService(threads.buildThreads.bloop.jsonrpc) // FIXME No
@@ -363,18 +363,18 @@ final class BspImpl(
       .create()
     val remoteClient = launcher.getRemoteProxy
     actualLocalClient.forwardToOpt = Some(remoteClient)
-    actualLocalServer.onConnectWithClient(actualLocalClient)
+    bspServerProxy.onConnectWithClient(actualLocalClient)
 
-    for (targetId <- actualLocalServer.targetIds)
+    for (targetId <- bspServerProxy.currentBspServer.targetIds)
       inputs.flattened().foreach {
         case f: Inputs.SingleFile =>
           actualLocalClient.resetDiagnostics(f.path, targetId)
         case _: Inputs.Virtual =>
       }
 
-    prepareBuild(actualLocalServer, remoteServer) match {
+    prepareBuild(bspServerProxy, remoteServer) match {
       case Left((ex, scope)) =>
-        actualLocalClient.reportBuildException(actualLocalServer.targetScopeIdOpt(scope), ex)
+        actualLocalClient.reportBuildException(bspServerProxy.targetScopeIdOpt(scope), ex)
         logger.log(ex)
       case Right(_) =>
     }
@@ -389,7 +389,7 @@ final class BspImpl(
     val f = launcher.startListening()
 
     val initiateFirstBuild: Runnable = { () =>
-      try build(actualLocalServer, remoteServer, actualLocalClient, notifyChanges = false, logger)
+      try build(bspServerProxy, remoteServer, actualLocalClient, notifyChanges = false, logger)
       catch {
         case t: Throwable =>
           logger.debug(s"Caught $t during initial BSP build, ignoring it")
@@ -402,7 +402,7 @@ final class BspImpl(
     val es = ExecutionContext.fromExecutorService(threads.buildThreads.bloop.jsonrpc)
     val futures = Seq(
       BspImpl.naiveJavaFutureToScalaFuture(f).map(_ => ())(es),
-      actualLocalServer.initiateShutdown
+      bspServerProxy.initiateShutdown
     )
     Future.firstCompletedOf(futures)(es)
   }
