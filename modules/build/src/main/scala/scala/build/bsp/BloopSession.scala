@@ -1,11 +1,19 @@
 package scala.build.bsp
 
+import ch.epfl.scala.bsp4j as b
 import com.swoval.files.PathWatchers
 
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicReference
 
+import scala.build.bloop.BloopServer
+import scala.build.blooprifle.BloopRifleConfig
 import scala.build.compiler.BloopCompiler
-import scala.build.{Build, Inputs}
+import scala.build.internal.Constants
+import scala.build.options.BuildOptions
+import scala.build.{Build, Inputs, Logger}
+import scala.collection.mutable.ListBuffer
+import scala.concurrent.duration.DurationInt
 
 final class BloopSession(
   val inputs: Inputs,
@@ -52,6 +60,56 @@ final class BloopSession(
 }
 
 object BloopSession {
+
+  def create(
+    inputs: Inputs,
+    bloopRifleConfig: BloopRifleConfig,
+    threads: BspThreads,
+    buildOptions: BuildOptions,
+    buildClient: b.BuildClient,
+    logger: Logger,
+    compile: (() => CompletableFuture[b.CompileResult]) => BloopSession => CompletableFuture[b.CompileResult],
+    build: BloopSession => Unit
+  ): BloopSession = {
+    val bloopServer = BloopServer.buildServer(
+      bloopRifleConfig,
+      "scala-cli",
+      Constants.version,
+      (inputs.workspace / Constants.workspaceDirName).toNIO,
+      Build.classesRootDir(inputs.workspace, inputs.projectName).toNIO,
+      buildClient,
+      threads.buildThreads.bloop,
+      logger.bloopRifleLogger
+    )
+    val remoteServer = new BloopCompiler(
+      bloopServer,
+      20.seconds,
+      strictBloopJsonCheck = buildOptions.internal.strictBloopJsonCheckOrDefault
+    )
+    lazy val bspServer = new BspServer(
+      remoteServer.bloopServer.server,
+      doCompile => compile(doCompile)(bloopSession0),
+      logger
+    )
+
+    lazy val watcher = new Build.Watcher(
+      ListBuffer(),
+      threads.buildThreads.fileWatcher,
+      build(bloopSession0),
+      ()
+    )
+    lazy val bloopSession0: BloopSession = new BloopSession(
+      inputs,
+      remoteServer,
+      bspServer,
+      watcher
+    )
+
+    bloopSession0.registerWatchInputs()
+    bspServer.newInputs(inputs)
+
+    bloopSession0
+  }
 
   final class Reference {
     private val ref = new AtomicReference[BloopSession](null)

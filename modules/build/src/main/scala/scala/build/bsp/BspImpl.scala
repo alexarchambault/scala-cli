@@ -11,14 +11,11 @@ import java.util.concurrent.{CompletableFuture, Executor}
 
 import scala.build.EitherCps.{either, value}
 import scala.build._
-import scala.build.bloop.{BloopServer, ScalaDebugServer}
+import scala.build.bloop.ScalaDebugServer
 import scala.build.blooprifle.BloopRifleConfig
-import scala.build.compiler.BloopCompiler
 import scala.build.errors.{BuildException, Diagnostic}
 import scala.build.internal.{Constants, CustomCodeWrapper}
 import scala.build.options.{BuildOptions, Scope}
-import scala.collection.mutable.ListBuffer
-import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success}
@@ -276,46 +273,17 @@ final class BspImpl(
     else
       actualLocalClient
 
-  private def newBloopSession(inputs: Inputs): BloopSession = {
-    val bloopServer = BloopServer.buildServer(
-      bloopRifleConfig,
-      "scala-cli",
-      Constants.version,
-      (inputs.workspace / Constants.workspaceDirName).toNIO,
-      Build.classesRootDir(inputs.workspace, inputs.projectName).toNIO,
-      localClient,
-      threads.buildThreads.bloop,
-      logger.bloopRifleLogger
-    )
-    val remoteServer = new BloopCompiler(
-      bloopServer,
-      20.seconds,
-      strictBloopJsonCheck = buildOptions.internal.strictBloopJsonCheckOrDefault
-    )
-    lazy val bspServer = new BspServer(
-      remoteServer.bloopServer.server,
-      doCompile => compile(bloopSession0, threads.prepareBuildExecutor, doCompile),
-      logger
-    )
-
-    lazy val watcher = new Build.Watcher(
-      ListBuffer(),
-      threads.buildThreads.fileWatcher,
-      build(bloopSession0, actualLocalClient, notifyChanges = true, logger),
-      ()
-    )
-    lazy val bloopSession0: BloopSession = new BloopSession(
+  private def newBloopSession(inputs: Inputs): BloopSession =
+    BloopSession.create(
       inputs,
-      remoteServer,
-      bspServer,
-      watcher
+      bloopRifleConfig,
+      threads,
+      buildOptions,
+      localClient,
+      logger,
+      doCompile => bloopSession0 => compile(bloopSession0, threads.prepareBuildExecutor, doCompile),
+      bloopSession0 => build(bloopSession0, actualLocalClient, notifyChanges = true, logger)
     )
-
-    bloopSession0.registerWatchInputs()
-    bspServer.newInputs(inputs)
-
-    bloopSession0
-  }
 
   private val bloopSession = new BloopSession.Reference
 
