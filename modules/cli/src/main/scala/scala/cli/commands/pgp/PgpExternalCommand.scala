@@ -19,6 +19,7 @@ abstract class PgpExternalCommand extends ExternalCommand {
     cache: Cache[Task],
     versionOpt: Option[String],
     args: Seq[String],
+    extraEnv: Map[String, String],
     logger: Logger,
     allowExecve: Boolean
   ): Either[BuildException, Int] = either {
@@ -34,9 +35,29 @@ abstract class PgpExternalCommand extends ExternalCommand {
       command,
       logger,
       allowExecve = allowExecve,
-      cwd = None
+      cwd = None,
+      extraEnv = extraEnv
     ).waitFor()
   }
+
+  def output(
+    cache: Cache[Task],
+    versionOpt: Option[String],
+    args: Seq[String],
+    extraEnv: Map[String, String],
+    logger: Logger
+  ): Either[BuildException, String] = either {
+
+    val archiveCache = ArchiveCache().withCache(cache)
+
+    val launcher = value(PgpExternalCommand.launcher(archiveCache, versionOpt, logger))
+
+    val command = Seq(launcher.toString) ++ externalCommand ++ args
+
+    os.proc(command).call(stdin = os.Inherit, env = extraEnv)
+      .out.text()
+  }
+
   def run(args: Seq[String]): Unit = {
 
     val (options, remainingArgs) =
@@ -53,6 +74,7 @@ abstract class PgpExternalCommand extends ExternalCommand {
       options.coursier.coursierCache(logger.coursierLogger("")),
       options.signingCliVersion.map(_.trim).filter(_.nonEmpty),
       remainingArgs,
+      Map(),
       logger,
       allowExecve = true
     ).orExit(logger)

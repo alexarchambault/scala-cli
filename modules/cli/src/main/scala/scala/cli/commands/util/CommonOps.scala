@@ -54,14 +54,18 @@ object CommonOps {
   }
 
   implicit class SharedPgpPushPullOptionsOps(private val options: SharedPgpPushPullOptions) {
-    def serverUriOptOrExit(logger: Logger): Option[Uri] = options.server.map { addr =>
-      Uri.parse(addr) match {
-        case Left(err) =>
-          if (logger.verbosity >= 0)
-            System.err.println(s"Error parsing key server address '$addr': $err")
-          sys.exit(1)
-        case Right(uri) => uri
-      }
-    }
+    def keyServerUriOptOrExit(logger: Logger): Option[Uri] =
+      options.keyServer
+        .filter(_.trim.nonEmpty)
+        .lastOption
+        .map { addr =>
+          Uri.parse(addr) match {
+            case Left(err) =>
+              if (logger.verbosity >= 0)
+                System.err.println(s"Error parsing key server address '$addr': $err")
+              sys.exit(1)
+            case Right(uri) => uri
+          }
+        }
   }
 }

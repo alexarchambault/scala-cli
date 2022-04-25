@@ -17,17 +17,13 @@ object PgpPush extends ScalaCommand[PgpPushOptions] {
     List("pgp", "push")
   )
 
-  def defaultServer =
-    // wouldn't https://keyserver.ubuntu.com work as well (https > http)
-    uri"http://keyserver.ubuntu.com:11371"
-
   def run(options: PgpPushOptions, args: RemainingArgs): Unit = {
 
     val logger = options.logging.logger
     val backend = ScalaCliSttpBackend.httpURLConnection(logger)
 
-    val keyServerUri = options.shared.serverUriOptOrExit(logger).getOrElse {
-      defaultServer
+    val keyServerUri = options.shared.keyServerUriOptOrExit(logger).getOrElse {
+      KeyServer.default
     }
 
     val all = args.all
@@ -36,8 +32,6 @@ object PgpPush extends ScalaCommand[PgpPushOptions] {
       System.err.println("No key passed as argument.")
       sys.exit(1)
     }
-
-    val addEndpoint = keyServerUri.addPath("pks", "add")
 
     for (key <- all) {
       val path = os.Path(key, os.pwd)
@@ -63,7 +57,7 @@ object PgpPush extends ScalaCommand[PgpPushOptions] {
 
       val res = KeyServer.add(
         keyContent,
-        addEndpoint,
+        keyServerUri,
         backend
       )
 

@@ -215,6 +215,7 @@ Available in commands:
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
 - [`publish`](./commands.md#publish)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`github secret create` / `gh secret create`](./commands.md#github-secret-create)
@@ -301,6 +302,7 @@ Available in commands:
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
 - [`publish`](./commands.md#publish)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -388,6 +390,7 @@ Available in commands:
 - [`pgp sign`](./commands.md#pgp-sign)
 - [`pgp verify`](./commands.md#pgp-verify)
 - [`publish`](./commands.md#publish)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`github secret create` / `gh secret create`](./commands.md#github-secret-create)
@@ -442,6 +445,30 @@ Show options for ScalaJS
 #### `--help-native`
 
 Show options for ScalaNative
+
+## Input options
+
+Available in commands:
+- [`bsp`](./commands.md#bsp)
+- [`compile`](./commands.md#compile)
+- [`export`](./commands.md#export)
+- [`fmt` / `format` / `scalafmt`](./commands.md#fmt)
+- [`browse` / `metabrowse`](./commands.md#browse)
+- [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
+- [`publish setup`](./commands.md#publish-setup)
+- [`console` / `repl`](./commands.md#console)
+- [`run`](./commands.md#run)
+- [`setup-ide`](./commands.md#setup-ide)
+- [`shebang`](./commands.md#shebang)
+- [`test`](./commands.md#test)
+
+
+<!-- Automatically generated, DO NOT EDIT MANUALLY -->
+
+#### `--default-forbidden-directories`
+
+#### `--forbid`
 
 ## Install completions options
 
@@ -599,6 +626,7 @@ Available in commands:
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
 - [`publish`](./commands.md#publish)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`github secret create` / `gh secret create`](./commands.md#github-secret-create)
@@ -919,6 +947,7 @@ Available in commands:
 
 Available in commands:
 - [`publish`](./commands.md#publish)
+- [`publish setup`](./commands.md#publish-setup)
 
 
 <!-- Automatically generated, DO NOT EDIT MANUALLY -->
@@ -1024,6 +1053,22 @@ Method to use to sign artifacts
 Aliases: `-G`, `--gpg-opt`
 
 gpg command-line options
+
+## Publish setup options
+
+Available in commands:
+- [`publish setup`](./commands.md#publish-setup)
+
+
+<!-- Automatically generated, DO NOT EDIT MANUALLY -->
+
+#### `--check`
+
+#### `--token`
+
+#### `--random-secret-key`
+
+#### `--random-secret-key-mail`
 
 ## Repl options
 
@@ -1340,10 +1385,6 @@ Generate SemanticDBs
 
 #### `--add-stubs`
 
-#### `--default-forbidden-directories`
-
-#### `--forbid`
-
 #### `--strict-bloop-json-check`
 
 ## Test options
@@ -1406,6 +1447,7 @@ Available in commands:
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
 - [`publish`](./commands.md#publish)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`github secret create` / `gh secret create`](./commands.md#github-secret-create)
@@ -1459,6 +1501,7 @@ Available in commands:
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
 - [`publish`](./commands.md#publish)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)

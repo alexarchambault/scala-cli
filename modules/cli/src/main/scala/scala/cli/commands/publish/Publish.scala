@@ -226,7 +226,7 @@ object Publish extends ScalaCommand[PublishOptions] {
     workingDir: os.Path,
     now: Instant,
     logger: Logger
-  ): Either[BuildException, (FileSet, String)] = either {
+  ): Either[BuildException, (FileSet, (coursier.core.Module, String))] = either {
 
     logger.debug(s"Preparing project ${build.project.projectName}")
 
@@ -295,24 +295,25 @@ object Publish extends ScalaCommand[PublishOptions] {
     val mainJar        = workingDir / org / s"$moduleName-$ver.jar"
     os.write(mainJar, mainJarContent, createFolders = true)
 
+    logger.message(s"Publishing $org:$moduleName:$ver")
     val pomContent = Pom.create(
       organization = coursier.Organization(org),
       moduleName = coursier.ModuleName(moduleName),
       version = ver,
       packaging = None,
-      url = publishOptions.url.map(_.value),
-      name = Some(name), // ?
+      url = pprint.err.log(publishOptions.url.map(_.value)),
+      name = Some(moduleName), // ?
       dependencies = dependencies,
-      description = publishOptions.description,
-      license = publishOptions.license.map(_.value).map { l =>
+      description = pprint.err.log(publishOptions.description.orElse(Some(moduleName))),
+      license = pprint.err.log(publishOptions.license.map(_.value).map { l =>
         Pom.License(l.name, l.url)
-      },
-      scm = publishOptions.versionControl.map { vcs =>
+      }),
+      scm = pprint.err.log(publishOptions.versionControl.map { vcs =>
         Pom.Scm(vcs.url, vcs.connection, vcs.developerConnection)
-      },
-      developers = publishOptions.developers.map { dev =>
+      }),
+      developers = pprint.err.log(publishOptions.developers.map { dev =>
         Pom.Developer(dev.id, dev.name, dev.url, dev.mail)
-      }
+      })
     )
 
     val sourceJarOpt =
@@ -360,8 +361,14 @@ object Publish extends ScalaCommand[PublishOptions] {
       }
       .toSeq
 
+    val mod = coursier.core.Module(
+      coursier.core.Organization(org),
+      coursier.core.ModuleName(moduleName),
+      Map()
+    )
+
     // TODO version listings, …
-    (FileSet(mainEntries ++ sourceJarEntries ++ docJarEntries), ver)
+    (FileSet(mainEntries ++ sourceJarEntries ++ docJarEntries), (mod, ver))
   }
 
   private def doPublish(
@@ -380,7 +387,7 @@ object Publish extends ScalaCommand[PublishOptions] {
     }
 
     val now = Instant.now()
-    val (fileSet0, versionOpt) = value {
+    val (fileSet0, modVersionOpt) = value {
       it
         // TODO Allow to add test JARs to the main build artifacts
         .filter(_._1.scope != Scope.Test)
@@ -391,8 +398,8 @@ object Publish extends ScalaCommand[PublishOptions] {
         .sequence0
         .map { l =>
           val fs          = l.map(_._1).foldLeft(FileSet.empty)(_ ++ _)
-          val versionOpt0 = l.headOption.map(_._2)
-          (fs, versionOpt0)
+          val modVersionOpt0 = l.headOption.map(_._2)
+          (fs, modVersionOpt0)
         }
     }
 
@@ -499,7 +506,7 @@ object Publish extends ScalaCommand[PublishOptions] {
         authOpt.fold(r)(r.withAuthentication)
       }
       val backend = ScalaCliSttpBackend.httpURLConnection(logger)
-      val api     = SonatypeApi(backend, base, authOpt, logger.verbosity)
+      val api     = SonatypeApi(backend, base + "/service/local", authOpt, logger.verbosity)
       val hooks0 = Hooks.sonatype(
         repo0,
         api,
@@ -537,7 +544,7 @@ object Publish extends ScalaCommand[PublishOptions] {
         (PublishRepository.Simple(repo0), Hooks.dummy)
     }
 
-    val isSnapshot0 = versionOpt.exists(_.endsWith("SNAPSHOT"))
+    val isSnapshot0 = modVersionOpt.exists(_._2.endsWith("SNAPSHOT"))
     val hooksData   = hooks.beforeUpload(finalFileSet, isSnapshot0).unsafeRun()(ec)
 
     val retainedRepo = hooks.repository(hooksData, repo, isSnapshot0)
@@ -560,6 +567,18 @@ object Publish extends ScalaCommand[PublishOptions] {
       case h :: t =>
         value(Left(new UploadError(::(h, t))))
       case Nil =>
+        hooks.afterUpload(hooksData).unsafeRun()(ec)
+        for ((mod, version) <- modVersionOpt) {
+          val checkRepo = repo.checkResultsRepo(isSnapshot0)
+          val relPath = (mod.organization.value.split('.').toSeq ++ Seq(mod.name.value, version)).mkString("/")
+          val path = {
+            val url = checkRepo.root.stripSuffix("/") + "/" + relPath
+            if (url.startsWith("file:")) Paths.get(new URI(url)).toString
+            else url
+          }
+          println("\n \ud83d\udc40 Check results at")
+          println(s"  $path")
+        }
     }
   }
 }

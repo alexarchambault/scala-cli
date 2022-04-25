@@ -20,8 +20,8 @@ object PgpPull extends ScalaCommand[PgpPullOptions] {
     val logger = options.logging.logger
     val backend = ScalaCliSttpBackend.httpURLConnection(logger)
 
-    val keyServerUri = options.shared.serverUriOptOrExit(logger).getOrElse {
-      PgpPush.defaultServer
+    val keyServerUri = options.shared.keyServerUriOptOrExit(logger).getOrElse {
+      KeyServer.default
     }
 
     val all = args.all
@@ -31,10 +31,10 @@ object PgpPull extends ScalaCommand[PgpPullOptions] {
       sys.exit(1)
     }
 
-    val lookupEndpoint = keyServerUri.addPath("pks", "lookup")
+    val lookupEndpoint = keyServerUri
 
     for (keyId <- all)
-      KeyServer.check(keyId, lookupEndpoint, backend) match {
+      KeyServer.check(keyId, keyServerUri, backend) match {
         case Left(err) =>
           System.err.println(s"Error checking $keyId: $err")
           sys.exit(1)
