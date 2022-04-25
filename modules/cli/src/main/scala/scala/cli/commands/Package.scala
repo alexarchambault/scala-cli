@@ -425,7 +425,7 @@ object Package extends ScalaCommand[PackageOptions] {
         else
           Nil
       val args = baseArgs ++
-        build.project.scalaCompiler.scalacOptions ++
+        build.project.scalaCompiler.map(_.scalacOptions).getOrElse(Nil) ++
         extraArgs ++
         defaultArgs ++
         Seq(build.output.toString)
