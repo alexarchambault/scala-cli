@@ -58,7 +58,7 @@ object Deps {
     def scalaMeta     = "4.5.4"
     def scalaNative   = "0.4.4"
     def scalaPackager = "0.1.26"
-    def signingCli    = "0.1.3"
+    def signingCli    = "0.1.6"
   }
   def ammonite = ivy"com.lihaoyi:::ammonite:2.5.3"
   def asm      = ivy"org.ow2.asm:asm:9.3"
@@ -71,7 +71,7 @@ object Deps {
   def coursier         = ivy"io.get-coursier:coursier_2.13:${Versions.coursier}"
   def coursierJvm      = ivy"io.get-coursier:coursier-jvm_2.13:${Versions.coursier}"
   def coursierLauncher = ivy"io.get-coursier:coursier-launcher_2.13:${Versions.coursier}"
-  def coursierPublish  = ivy"io.get-coursier.publish:publish_2.13:0.1.0"
+  def coursierPublish  = ivy"io.get-coursier.publish:publish_2.13:0.1.2"
   // TODO - update to working version
   def dependency   = ivy"io.get-coursier::dependency:0.2.2"
   def dockerClient = ivy"com.spotify:docker-client:8.16.0"
