@@ -1,8 +1,9 @@
 package scala.cli.commands.pgp
 
-import coursier.cache.ArchiveCache
+import coursier.cache.{ArchiveCache, Cache}
 import coursier.util.Task
 
+import scala.build.EitherCps.{either, value}
 import scala.build.Logger
 import scala.build.errors.BuildException
 import scala.build.internal.{Constants, FetchExternalBinary, Runner}
@@ -13,6 +14,29 @@ import scala.util.Properties
 abstract class PgpExternalCommand extends ExternalCommand {
   def progName: String = ScalaCli.progName
   def externalCommand: Seq[String]
+
+  def tryRun(
+    cache: Cache[Task],
+    versionOpt: Option[String],
+    args: Seq[String],
+    logger: Logger,
+    allowExecve: Boolean
+  ): Either[BuildException, Int] = either {
+
+    val archiveCache = ArchiveCache().withCache(cache)
+
+    val launcher = value(PgpExternalCommand.launcher(archiveCache, versionOpt, logger))
+
+    val command = Seq(launcher.toString) ++ externalCommand ++ args
+
+    Runner.run0(
+      progName,
+      command,
+      logger,
+      allowExecve = allowExecve,
+      cwd = None
+    ).waitFor()
+  }
   def run(args: Seq[String]): Unit = {
 
     val (options, remainingArgs) =
@@ -24,22 +48,14 @@ abstract class PgpExternalCommand extends ExternalCommand {
       }
 
     val logger = options.logging.logger
-    val archiveCache = {
-      val cache = options.coursier.coursierCache(logger.coursierLogger(""))
-      ArchiveCache().withCache(cache)
-    }
 
-    val versionOpt = options.signingCliVersion.map(_.trim).filter(_.nonEmpty)
-    val launcher = PgpExternalCommand.launcher(archiveCache, versionOpt, logger)
-      .orExit(logger)
-
-    val command = Seq(launcher.toString) ++ externalCommand ++ remainingArgs
-
-    val retCode = Runner.maybeExec(
-      progName,
-      command,
-      logger
-    ).waitFor()
+    val retCode = tryRun(
+      options.coursier.coursierCache(logger.coursierLogger("")),
+      options.signingCliVersion.map(_.trim).filter(_.nonEmpty),
+      remainingArgs,
+      logger,
+      allowExecve = true
+    ).orExit(logger)
 
     if (retCode != 0)
       sys.exit(retCode)
