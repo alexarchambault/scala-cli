@@ -7,7 +7,7 @@ import java.nio.file.InvalidPathException
 
 import scala.cli.commands._
 import scala.cli.commands.github.{SecretCreate, SecretList}
-import scala.cli.commands.pgp.{PgpCommands, PgpCommandsSubst}
+import scala.cli.commands.pgp.{PgpCommands, PgpCommandsSubst, PgpPull, PgpPush}
 import scala.cli.commands.publish.Publish
 
 class ScalaCliCommands(
@@ -40,6 +40,8 @@ class ScalaCliCommands(
     Metabrowse,
     Repl,
     Package,
+    PgpPull,
+    PgpPush,
     Publish,
     Run,
     SecretCreate,

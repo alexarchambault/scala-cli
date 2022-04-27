@@ -2,8 +2,10 @@ package scala.cli.commands
 package util
 
 import coursier.cache.{CacheLogger, FileCache}
+import sttp.model.Uri
 
 import scala.build.{Logger, Os}
+import scala.cli.commands.pgp.SharedPgpPushPullOptions
 import scala.cli.internal.CliLogger
 import scala.concurrent.duration.Duration
 
@@ -48,6 +50,18 @@ object CommonOps {
       for (loc <- cache.filter(_.trim.nonEmpty))
         baseCache = baseCache.withLocation(loc)
       baseCache
+    }
+  }
+
+  implicit class SharedPgpPushPullOptionsOps(private val options: SharedPgpPushPullOptions) {
+    def serverUriOptOrExit(logger: Logger): Option[Uri] = options.server.map { addr =>
+      Uri.parse(addr) match {
+        case Left(err) =>
+          if (logger.verbosity >= 0)
+            System.err.println(s"Error parsing key server address '$addr': $err")
+          sys.exit(1)
+        case Right(uri) => uri
+      }
     }
   }
 }
