@@ -304,8 +304,8 @@ object SharedOptionsUtil {
         logger,
         coursierCache,
         workspace.forcedWorkspaceOpt,
-        defaultForbiddenDirectories,
-        forbid
+        input.defaultForbiddenDirectories,
+        input.forbid
       )
 
     def validateInputArgs(args: Seq[String]): Seq[Either[String, Seq[Inputs.Element]]] =
