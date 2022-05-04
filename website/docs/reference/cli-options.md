@@ -981,6 +981,10 @@ Password to use with publishing repository
 
 Secret key to use to sign artifacts with BouncyCastle
 
+#### `--public-key`
+
+Public key to use to verify artifacts (to be uploaded to a key server)
+
 #### `--secret-key-password`
 
 Aliases: `--secret-key-pass`
