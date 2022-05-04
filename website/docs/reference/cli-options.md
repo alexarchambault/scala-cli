@@ -883,6 +883,10 @@ Available in commands:
 
 #### `--secret-dest`
 
+#### `--verbose`
+
+#### `--quiet`
+
 ## Pgp sign options
 
 Available in commands:
@@ -964,6 +968,14 @@ Developer(s) to add in publishing metadata, like "alex|Alex|https://alex.info" o
 Aliases: `-R`, `--publish-repo`
 
 Repository to publish to
+
+#### `--user`
+
+User to use with publishing repository
+
+#### `--password`
+
+Password to use with publishing repository
 
 #### `--secret-key`
 
