@@ -316,7 +316,7 @@ object Publish extends ScalaCommand[PublishOptions] {
       url = publishOptions.url.map(_.value),
       name = Some(moduleName),
       dependencies = dependencies,
-      description = publishOptions.description,
+      description = publishOptions.description.orElse(Some(moduleName)),
       license = publishOptions.license.map(_.value).map { l =>
         Pom.License(l.name, l.url)
       },
