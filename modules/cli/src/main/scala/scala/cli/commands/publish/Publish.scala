@@ -36,6 +36,7 @@ import scala.cli.commands.util.ScalaCliSttpBackend
 import scala.cli.commands.util.SharedOptionsUtil._
 import scala.cli.commands.{Package => PackageCmd, ScalaCommand, WatchUtil}
 import scala.cli.errors.{FailedToSignFileError, MissingPublishOptionError, UploadError}
+import scala.cli.internal.BouncycastleSignerMakerSubst
 import scala.cli.packaging.Library
 import scala.cli.publish.BouncycastleSignerMaker
 
@@ -151,7 +152,13 @@ object Publish extends ScalaCommand[PublishOptions] {
         postAction = () => WatchUtil.printWatchMessage()
       ) { res =>
         res.orReport(logger).foreach { builds =>
-          maybePublish(builds, workingDir, logger, allowExit = false)
+          maybePublish(
+            builds,
+            workingDir,
+            logger,
+            allowExit = false,
+            forceSigningBinary = options.forceSigningBinary
+          )
         }
       }
       try WatchUtil.waitForCtrlC()
@@ -169,7 +176,13 @@ object Publish extends ScalaCommand[PublishOptions] {
           buildTests = false,
           partial = None
         ).orExit(logger)
-      maybePublish(builds, workingDir, logger, allowExit = true)
+      maybePublish(
+        builds,
+        workingDir,
+        logger,
+        allowExit = true,
+        forceSigningBinary = options.forceSigningBinary
+      )
     }
   }
 
@@ -184,7 +197,8 @@ object Publish extends ScalaCommand[PublishOptions] {
     builds: Builds,
     workingDir: os.Path,
     logger: Logger,
-    allowExit: Boolean
+    allowExit: Boolean,
+    forceSigningBinary: Boolean
   ): Unit = {
 
     val allOk = builds.all.forall {
@@ -204,7 +218,7 @@ object Publish extends ScalaCommand[PublishOptions] {
       val docBuilds0 = builds.allDoc.collect {
         case s: Build.Successful => s
       }
-      val res = doPublish(builds0, docBuilds0, workingDir, logger)
+      val res = doPublish(builds0, docBuilds0, workingDir, logger, forceSigningBinary)
       if (allowExit)
         res.orExit(logger)
       else
@@ -366,7 +380,8 @@ object Publish extends ScalaCommand[PublishOptions] {
     builds: Seq[Build.Successful],
     docBuilds: Seq[Build.Successful],
     workingDir: os.Path,
-    logger: Logger
+    logger: Logger,
+    forceSigningBinary: Boolean
   ): Either[BuildException, Unit] = either {
 
     assert(docBuilds.isEmpty || docBuilds.length == builds.length)
@@ -427,12 +442,20 @@ object Publish extends ScalaCommand[PublishOptions] {
                 case Right(value) => value.wrapped
               }
             }
-            (new BouncycastleSignerMaker).get(
-              publishOptions.secretKeyPassword.orNull,
-              secretKey,
-              getLauncher,
-              logger
-            )
+            if (forceSigningBinary)
+              (new scala.cli.internal.BouncycastleSignerMakerSubst).get(
+                publishOptions.secretKeyPassword.orNull,
+                secretKey,
+                getLauncher,
+                logger
+              )
+            else
+              (new BouncycastleSignerMaker).get(
+                publishOptions.secretKeyPassword.orNull,
+                secretKey,
+                getLauncher,
+                logger
+              )
           case None => NopSigner
         }
       case None => NopSigner

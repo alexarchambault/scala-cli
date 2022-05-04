@@ -1029,6 +1029,8 @@ Aliases: `-G`, `--gpg-opt`
 
 gpg command-line options
 
+#### `--force-signing-binary`
+
 ## Repl options
 
 Available in commands:

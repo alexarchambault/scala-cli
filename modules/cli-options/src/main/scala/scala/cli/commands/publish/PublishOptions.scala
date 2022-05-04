@@ -61,7 +61,11 @@ final case class PublishOptions(
   @ValueDescription("argument")
   @ExtraName("G")
   @ExtraName("gpgOpt")
-    gpgOption: List[String] = Nil
+    gpgOption: List[String] = Nil,
+
+  @Group("Publishing")
+  @Hidden
+    forceSigningBinary: Boolean = false
 )
 // format: on
 
