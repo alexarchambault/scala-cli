@@ -215,6 +215,7 @@ Available in commands:
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
 - [`publish`](./commands.md#publish)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`github secret create` / `gh secret create`](./commands.md#github-secret-create)
@@ -301,6 +302,7 @@ Available in commands:
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
 - [`publish`](./commands.md#publish)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -391,6 +393,7 @@ Available in commands:
 - [`pgp sign`](./commands.md#pgp-sign)
 - [`pgp verify`](./commands.md#pgp-verify)
 - [`publish`](./commands.md#publish)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`github secret create` / `gh secret create`](./commands.md#github-secret-create)
@@ -456,6 +459,7 @@ Available in commands:
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
 - [`publish`](./commands.md#publish)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -627,6 +631,7 @@ Available in commands:
 - [`pgp pull`](./commands.md#pgp-pull)
 - [`pgp push`](./commands.md#pgp-push)
 - [`publish`](./commands.md#publish)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`github secret create` / `gh secret create`](./commands.md#github-secret-create)
@@ -954,6 +959,7 @@ Aliases: `-f`
 Available in commands:
 - [`pgp pull`](./commands.md#pgp-pull)
 - [`pgp push`](./commands.md#pgp-push)
+- [`publish setup`](./commands.md#publish-setup)
 
 
 <!-- Automatically generated, DO NOT EDIT MANUALLY -->
@@ -992,6 +998,7 @@ Available in commands:
 
 Available in commands:
 - [`publish`](./commands.md#publish)
+- [`publish setup`](./commands.md#publish-setup)
 
 
 <!-- Automatically generated, DO NOT EDIT MANUALLY -->
@@ -1103,6 +1110,22 @@ Aliases: `-G`, `--gpg-opt`
 gpg command-line options
 
 #### `--force-signing-binary`
+
+## Publish setup options
+
+Available in commands:
+- [`publish setup`](./commands.md#publish-setup)
+
+
+<!-- Automatically generated, DO NOT EDIT MANUALLY -->
+
+#### `--check`
+
+#### `--token`
+
+#### `--random-secret-key`
+
+#### `--random-secret-key-mail`
 
 ## Repl options
 
@@ -1483,6 +1506,7 @@ Available in commands:
 - [`pgp pull`](./commands.md#pgp-pull)
 - [`pgp push`](./commands.md#pgp-push)
 - [`publish`](./commands.md#publish)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`github secret create` / `gh secret create`](./commands.md#github-secret-create)
@@ -1536,6 +1560,7 @@ Available in commands:
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
 - [`publish`](./commands.md#publish)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)

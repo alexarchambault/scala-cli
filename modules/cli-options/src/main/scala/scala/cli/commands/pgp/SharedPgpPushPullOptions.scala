@@ -6,7 +6,7 @@ import scala.cli.commands.LoggingOptions
 
 // format: off
 final case class SharedPgpPushPullOptions(
-  keyServer: Option[String] = None
+  keyServer: List[String] = Nil
 )
 // format: on
 
