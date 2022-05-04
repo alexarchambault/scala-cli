@@ -385,6 +385,8 @@ Available in commands:
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
 - [`pgp create`](./commands.md#pgp-create)
+- [`pgp pull`](./commands.md#pgp-pull)
+- [`pgp push`](./commands.md#pgp-push)
 - [`pgp sign`](./commands.md#pgp-sign)
 - [`pgp verify`](./commands.md#pgp-verify)
 - [`publish`](./commands.md#publish)
@@ -598,6 +600,8 @@ Available in commands:
 - [`github secret list` / `gh secret list`](./commands.md#github-secret-list)
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
+- [`pgp pull`](./commands.md#pgp-pull)
+- [`pgp push`](./commands.md#pgp-push)
 - [`publish`](./commands.md#publish)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
@@ -886,6 +890,41 @@ Available in commands:
 #### `--verbose`
 
 #### `--quiet`
+
+## Pgp pull options
+
+Available in commands:
+- [`pgp pull`](./commands.md#pgp-pull)
+
+
+<!-- Automatically generated, DO NOT EDIT MANUALLY -->
+
+#### `--allow-empty`
+
+## Pgp push options
+
+Available in commands:
+- [`pgp push`](./commands.md#pgp-push)
+
+
+<!-- Automatically generated, DO NOT EDIT MANUALLY -->
+
+#### `--force`
+
+Aliases: `-f`
+
+#### `--allow-empty`
+
+## Pgp push pull options
+
+Available in commands:
+- [`pgp pull`](./commands.md#pgp-pull)
+- [`pgp push`](./commands.md#pgp-push)
+
+
+<!-- Automatically generated, DO NOT EDIT MANUALLY -->
+
+#### `--key-server`
 
 ## Pgp sign options
 
@@ -1411,6 +1450,8 @@ Available in commands:
 - [`github secret list` / `gh secret list`](./commands.md#github-secret-list)
 - [`browse` / `metabrowse`](./commands.md#browse)
 - [`package`](./commands.md#package)
+- [`pgp pull`](./commands.md#pgp-pull)
+- [`pgp push`](./commands.md#pgp-push)
 - [`publish`](./commands.md#publish)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
