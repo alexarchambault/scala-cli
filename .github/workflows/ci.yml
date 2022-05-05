@@ -343,14 +343,11 @@ jobs:
     - uses: VirtusLab/scala-cli-setup@a75e898b6b8465492da8c3a4d260652e6150ceda
       with:
         jvm: "temurin:17"
-    - run: ./mill -i ci.setShouldPublish
     - uses: actions/download-artifact@v3
-      if: env.SHOULD_PUBLISH == 'true'
       with:
         name: launchers
         path: artifacts/
     - run: ./mill -i uploadLaunchers artifacts/
-      if: env.SHOULD_PUBLISH == 'true'
       env:
         UPLOAD_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
