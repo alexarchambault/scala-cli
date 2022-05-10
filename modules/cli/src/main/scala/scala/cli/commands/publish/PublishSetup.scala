@@ -28,6 +28,12 @@ object PublishSetup extends ScalaCommand[PublishSetupOptions] {
 
   def run(options: PublishSetupOptions, args: RemainingArgs): Unit = {
 
+    if (options.publishParams.license.contains("list")) {
+      for (l <- scala.build.internal.Licenses.list)
+        println(s"${l.id}: ${l.name} (${l.url})")
+      sys.exit(0)
+    }
+
     val logger        = options.logging.logger
     val coursierCache = options.coursier.coursierCache(logger.coursierLogger(""))
 
