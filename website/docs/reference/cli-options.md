@@ -217,6 +217,20 @@ Aliases: `-X`
 
 Cross-compile sources
 
+## Config options
+
+Available in commands:
+- [`config`](./commands.md#config)
+
+
+<!-- Automatically generated, DO NOT EDIT MANUALLY -->
+
+#### `--dump`
+
+#### `--create-key`
+
+#### `--password`
+
 ## Coursier options
 
 Available in commands:
@@ -224,6 +238,7 @@ Available in commands:
 - [`bloop start`](./commands.md#bloop-start)
 - [`bsp`](./commands.md#bsp)
 - [`compile`](./commands.md#compile)
+- [`config`](./commands.md#config)
 - [`doc`](./commands.md#doc)
 - [`export`](./commands.md#export)
 - [`fmt` / `format` / `scalafmt`](./commands.md#fmt)
@@ -340,6 +355,7 @@ Available in commands:
 - [`bsp`](./commands.md#bsp)
 - [`clean`](./commands.md#clean)
 - [`compile`](./commands.md#compile)
+- [`config`](./commands.md#config)
 - [`directories`](./commands.md#directories)
 - [`doc`](./commands.md#doc)
 - [`export`](./commands.md#export)
@@ -459,6 +475,7 @@ Available in commands:
 - [`bsp`](./commands.md#bsp)
 - [`clean`](./commands.md#clean)
 - [`compile`](./commands.md#compile)
+- [`config`](./commands.md#config)
 - [`default-file`](./commands.md#default-file)
 - [`directories`](./commands.md#directories)
 - [`doc`](./commands.md#doc)
@@ -688,6 +705,7 @@ Available in commands:
 - [`bsp`](./commands.md#bsp)
 - [`clean`](./commands.md#clean)
 - [`compile`](./commands.md#compile)
+- [`config`](./commands.md#config)
 - [`default-file`](./commands.md#default-file)
 - [`doc`](./commands.md#doc)
 - [`export`](./commands.md#export)
@@ -1596,6 +1614,7 @@ Available in commands:
 - [`bsp`](./commands.md#bsp)
 - [`clean`](./commands.md#clean)
 - [`compile`](./commands.md#compile)
+- [`config`](./commands.md#config)
 - [`default-file`](./commands.md#default-file)
 - [`directories`](./commands.md#directories)
 - [`doc`](./commands.md#doc)
