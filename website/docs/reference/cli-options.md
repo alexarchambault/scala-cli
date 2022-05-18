@@ -553,6 +553,31 @@ Show options for ScalaJS
 
 Show options for ScalaNative
 
+## Input options
+
+Available in commands:
+- [`bsp`](./commands.md#bsp)
+- [`compile`](./commands.md#compile)
+- [`doc`](./commands.md#doc)
+- [`export`](./commands.md#export)
+- [`fmt` / `format` / `scalafmt`](./commands.md#fmt)
+- [`browse` / `metabrowse`](./commands.md#browse)
+- [`package`](./commands.md#package)
+- [`publish`](./commands.md#publish)
+- [`publish local`](./commands.md#publish-local)
+- [`console` / `repl`](./commands.md#console)
+- [`run`](./commands.md#run)
+- [`setup-ide`](./commands.md#setup-ide)
+- [`shebang`](./commands.md#shebang)
+- [`test`](./commands.md#test)
+
+
+<!-- Automatically generated, DO NOT EDIT MANUALLY -->
+
+#### `--default-forbidden-directories`
+
+#### `--forbid`
+
 ## Install completions options
 
 Available in commands:
@@ -1552,10 +1577,6 @@ Add a resource directory
 Generate SemanticDBs
 
 #### `--add-stubs`
-
-#### `--default-forbidden-directories`
-
-#### `--forbid`
 
 #### `--strict-bloop-json-check`
 
