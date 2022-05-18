@@ -46,6 +46,10 @@ final case class PublishParamsOptions(
     secretKey: Option[PasswordOption] = None,
 
   @Group("Publishing")
+  @HelpMessage("Public key to use to verify artifacts (to be uploaded to a key server)")
+    publicKey: Option[PasswordOption] = None,
+
+  @Group("Publishing")
   @HelpMessage("Password of secret key to use to sign artifacts with BouncyCastle")
   @ValueDescription("value:…")
   @ExtraName("secretKeyPass")

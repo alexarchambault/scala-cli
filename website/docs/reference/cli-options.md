@@ -247,6 +247,7 @@ Available in commands:
 - [`pgp push`](./commands.md#pgp-push)
 - [`publish`](./commands.md#publish)
 - [`publish local`](./commands.md#publish-local)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`github secret create` / `gh secret create`](./commands.md#github-secret-create)
@@ -365,6 +366,7 @@ Available in commands:
 - [`package`](./commands.md#package)
 - [`publish`](./commands.md#publish)
 - [`publish local`](./commands.md#publish-local)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -496,6 +498,7 @@ Available in commands:
 - [`pgp verify`](./commands.md#pgp-verify)
 - [`publish`](./commands.md#publish)
 - [`publish local`](./commands.md#publish-local)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`github secret create` / `gh secret create`](./commands.md#github-secret-create)
@@ -565,6 +568,7 @@ Available in commands:
 - [`package`](./commands.md#package)
 - [`publish`](./commands.md#publish)
 - [`publish local`](./commands.md#publish-local)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
@@ -743,6 +747,7 @@ Available in commands:
 - [`pgp push`](./commands.md#pgp-push)
 - [`publish`](./commands.md#publish)
 - [`publish local`](./commands.md#publish-local)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`github secret create` / `gh secret create`](./commands.md#github-secret-create)
@@ -1079,6 +1084,7 @@ Whether to exit with code 0 if no key is passed
 Available in commands:
 - [`pgp pull`](./commands.md#pgp-pull)
 - [`pgp push`](./commands.md#pgp-push)
+- [`publish setup`](./commands.md#publish-setup)
 
 
 <!-- Automatically generated, DO NOT EDIT MANUALLY -->
@@ -1179,6 +1185,7 @@ Set Ivy 2 home directory
 Available in commands:
 - [`publish`](./commands.md#publish)
 - [`publish local`](./commands.md#publish-local)
+- [`publish setup`](./commands.md#publish-setup)
 
 
 <!-- Automatically generated, DO NOT EDIT MANUALLY -->
@@ -1227,6 +1234,10 @@ Developer(s) to add in publishing metadata, like "alex|Alex|https://alex.info" o
 
 Secret key to use to sign artifacts with BouncyCastle
 
+#### `--public-key`
+
+Public key to use to verify artifacts (to be uploaded to a key server)
+
 #### `--secret-key-password`
 
 Aliases: `--secret-key-pass`
@@ -1241,6 +1252,7 @@ Use or setup publish parameters meant to be used on continuous integration
 
 Available in commands:
 - [`publish`](./commands.md#publish)
+- [`publish setup`](./commands.md#publish-setup)
 
 
 <!-- Automatically generated, DO NOT EDIT MANUALLY -->
@@ -1258,6 +1270,26 @@ User to use with publishing repository
 #### `--password`
 
 Password to use with publishing repository
+
+## Publish setup options
+
+Available in commands:
+- [`publish setup`](./commands.md#publish-setup)
+
+
+<!-- Automatically generated, DO NOT EDIT MANUALLY -->
+
+#### `--check`
+
+#### `--token`
+
+#### `--random-secret-key`
+
+#### `--random-secret-key-mail`
+
+#### `--checks`
+
+#### `--check-workflow`
 
 ## Repl options
 
@@ -1659,6 +1691,7 @@ Available in commands:
 - [`pgp push`](./commands.md#pgp-push)
 - [`publish`](./commands.md#publish)
 - [`publish local`](./commands.md#publish-local)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`github secret create` / `gh secret create`](./commands.md#github-secret-create)
@@ -1717,6 +1750,7 @@ Available in commands:
 - [`package`](./commands.md#package)
 - [`publish`](./commands.md#publish)
 - [`publish local`](./commands.md#publish-local)
+- [`publish setup`](./commands.md#publish-setup)
 - [`console` / `repl`](./commands.md#console)
 - [`run`](./commands.md#run)
 - [`setup-ide`](./commands.md#setup-ide)
