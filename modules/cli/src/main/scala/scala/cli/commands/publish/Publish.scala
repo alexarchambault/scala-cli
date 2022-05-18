@@ -51,6 +51,7 @@ import scala.cli.errors.{
 }
 import scala.cli.packaging.Library
 import scala.cli.publish.BouncycastleSignerMaker
+import scala.cli.signing.shared.Secret
 
 object Publish extends ScalaCommand[PublishOptions] {
 
@@ -619,6 +620,19 @@ object Publish extends ScalaCommand[PublishOptions] {
           case Some("central-s01" | "maven-central-s01" | "mvn-central-s01") =>
             centralRepo("https://s01.oss.sonatype.org")
           case Some(repoStr) =>
+            val userOpt     = publishOptions.repoUser.map(_.get())
+            val passwordOpt = publishOptions.repoPassword.map(_.get())
+
+            val authOpt =
+              if (userOpt.isDefined || passwordOpt.isDefined) {
+                val user     = userOpt.getOrElse(Secret(""))
+                val password = passwordOpt.getOrElse(Secret(""))
+                val auth =
+                  Authentication(user.value, password.value)
+                Some(auth)
+              }
+              else None
+
             val repo0 = RepositoryParser.repositoryOpt(repoStr)
               .collect {
                 case m: MavenRepository =>
@@ -630,6 +644,7 @@ object Publish extends ScalaCommand[PublishOptions] {
                   else os.Path(repoStr, Os.pwd).toNIO.toUri.toASCIIString
                 MavenRepository(url)
               }
+              .withAuthentication(authOpt)
             (
               PublishRepository.Simple(repo0),
               None,
