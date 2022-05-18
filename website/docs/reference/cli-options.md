@@ -1145,6 +1145,8 @@ Set Ivy 2 home directory
 
 #### `--ivy2-local-like`
 
+#### `--parallel-upload`
+
 ## Publish params options
 
 Available in commands:
