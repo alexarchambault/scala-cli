@@ -628,7 +628,7 @@ object Publish extends ScalaCommand[PublishOptions] {
                 val user     = userOpt.getOrElse(Secret(""))
                 val password = passwordOpt.getOrElse(Secret(""))
                 val auth =
-                  Authentication(user.value, password.value)
+                  Authentication(user.value, password.value).withRealm("GitHub Package Registry")
                 Some(auth)
               }
               else None
