@@ -79,7 +79,7 @@ object OptionChecks {
     logger: Logger
   ) = OptionCheck(
     "computeVersion",
-    "publish.computeVersion",
+    "publish" + (if (options.publishParams.isCi) ".ci" else "") + ".computeVersion",
     pubOpt =>
       pubOpt.version.nonEmpty || pubOpt.retained(
         options.publishParams.isCi
@@ -112,7 +112,7 @@ object OptionChecks {
     logger: Logger
   ) = OptionCheck.opt(
     "repository",
-    "publish.repository",
+    "publish" + (if (options.publishParams.isCi) ".ci" else "") + ".repository",
     _.retained(options.publishParams.isCi).repository,
     () => {
       val repo = options.publishRepo.publishRepository.getOrElse {
@@ -132,7 +132,7 @@ object OptionChecks {
     logger: Logger
   ) = OptionCheck.opt(
     "user",
-    "publish.user",
+    "publish" + (if (options.publishParams.isCi) ".ci" else "") + ".user",
     _.retained(options.publishParams.isCi).repoUser,
     () =>
       either {
@@ -158,11 +158,18 @@ object OptionChecks {
             }
         }
 
-        OptionCheck.DefaultValue.simple(
-          "env:PUBLISH_USER",
-          Nil,
-          Seq(SetSecret("PUBLISH_USER", user0.get(), force = true))
-        )
+        if (options.publishParams.isCi)
+          OptionCheck.DefaultValue.simple(
+            "env:PUBLISH_USER",
+            Nil,
+            Seq(SetSecret("PUBLISH_USER", user0.get(), force = true))
+          )
+        else
+          OptionCheck.DefaultValue.simple(
+            user0.asString.value,
+            Nil,
+            Nil
+          )
       },
     OptionCheck.Kind.Repository
   )
@@ -173,7 +180,7 @@ object OptionChecks {
     logger: Logger
   ) = OptionCheck.opt(
     "password",
-    "publish.password",
+    "publish" + (if (options.publishParams.isCi) ".ci" else "") + ".password",
     _.retained(options.publishParams.isCi).repoPassword,
     () =>
       either {
@@ -199,11 +206,18 @@ object OptionChecks {
             }
         }
 
-        OptionCheck.DefaultValue.simple(
-          "env:PUBLISH_PASSWORD",
-          Nil,
-          Seq(SetSecret("PUBLISH_PASSWORD", password.get(), force = true))
-        )
+        if (options.publishParams.isCi)
+          OptionCheck.DefaultValue.simple(
+            "env:PUBLISH_PASSWORD",
+            Nil,
+            Seq(SetSecret("PUBLISH_PASSWORD", password.get(), force = true))
+          )
+        else
+          OptionCheck.DefaultValue.simple(
+            password.asString.value,
+            Nil,
+            Nil
+          )
       },
     OptionCheck.Kind.Repository
   )
@@ -214,10 +228,14 @@ object OptionChecks {
     configDb: ConfigDb,
     logger: Logger,
     backend: SttpBackend[Identity, Any]
-  ) = OptionCheck.opt(
+  ) = OptionCheck(
     "pgp-secret-key",
-    "publish.secretKey",
-    _.retained(options.publishParams.isCi).secretKey,
+    "publish" + (if (options.publishParams.isCi) ".ci" else "") + ".secretKey",
+    opt => {
+      val opt0 = opt.retained(options.publishParams.isCi)
+      !opt0.repository.orElse(options.publishRepo.publishRepository).contains("github") &&
+      opt0.secretKey.nonEmpty
+    },
     () =>
       either {
         val (pubKeyOpt, secretKey, passwordOpt) = options.publishParams.secretKey match {
@@ -326,20 +344,33 @@ object OptionChecks {
             )
             () => Right(())
         }
-        val passwordSetSecret = passwordOpt.map { p =>
-          SetSecret("PUBLISH_SECRET_KEY_PASSWORD", p, force = true)
-        }
-        val extraDirectives = passwordOpt.toSeq.map { _ =>
-          "publish.secretKeyPassword" -> "env:PUBLISH_SECRET_KEY_PASSWORD"
-        }
-        val setSecrets =
-          Seq(SetSecret("PUBLISH_SECRET_KEY", secretKey, force = true)) ++ passwordSetSecret.toSeq
+        val (passwordSetSecret, extraDirectives) = passwordOpt
+          .map { p =>
+            val dir =
+              if (options.publishParams.isCi)
+                "publish.secretKeyPassword" -> "env:PUBLISH_SECRET_KEY_PASSWORD"
+              else
+                "publish.secretKeyPassword" -> "env:PUBLISH_SECRET_KEY_PASSWORD"
+            val setSec = SetSecret("PUBLISH_SECRET_KEY_PASSWORD", p, force = true)
+            (Seq(setSec), Seq(dir))
+          }
+          .getOrElse((Nil, Nil))
 
-        OptionCheck.DefaultValue(
-          () => pushKey().map(_ => "env:PUBLISH_SECRET_KEY"),
-          extraDirectives,
-          setSecrets
-        )
+        if (options.publishParams.isCi) {
+          val setSecrets =
+            Seq(SetSecret("PUBLISH_SECRET_KEY", secretKey, force = true)) ++ passwordSetSecret
+          OptionCheck.DefaultValue(
+            () => pushKey().map(_ => "env:PUBLISH_SECRET_KEY"),
+            extraDirectives,
+            setSecrets
+          )
+        }
+        else
+          OptionCheck.DefaultValue(
+            () => ???,
+            extraDirectives,
+            Nil
+          )
       },
     OptionCheck.Kind.Signing
   )
