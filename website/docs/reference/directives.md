@@ -107,22 +107,6 @@ Set the default platform to Scala.js or Scala Native
 
 ### Publish
 
-Set parameters for publishing (contextual)
-
-`//> using publish.organization `"value"
-`//> using publish.name `"value"
-`//> using publish.version `"value"
-
-
-#### Examples
-`//> using publish.organization "io.github.myself"`
-
-`//> using publish.name "my-library"`
-
-`//> using publish.version "0.1.1"`
-
-### Publish
-
 Set parameters for publishing
 
 `//> using publish.organization `"value"
@@ -136,6 +120,22 @@ Set parameters for publishing
 `//> using publish.name "my-library"`
 
 `//> using publish.version "0.1.1"`
+
+### Publish (contextual)
+
+Set contextual parameters for publishing
+
+`//> using publish.computeVersion `"value"
+`//> using publish.ci.repository `"value"
+`//> using publish.secretKey `"value"
+
+
+#### Examples
+`//> using publish.computeVersion "git:tag"`
+
+`//> using publish.ci.repository "central-s01"`
+
+`//> using publish.secretKey "env:PUBLISH_SECRET_KEY"`
 
 ### Repository
 

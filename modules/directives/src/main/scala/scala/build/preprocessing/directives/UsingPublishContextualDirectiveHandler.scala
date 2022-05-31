@@ -2,14 +2,8 @@ package scala.build.preprocessing.directives
 
 import scala.build.EitherCps.{either, value}
 import scala.build.Logger
-import scala.build.Ops._
-import scala.build.errors.{
-  BuildException,
-  CompositeBuildException,
-  MalformedInputError,
-  UnexpectedDirectiveError
-}
-import scala.build.options.publish.{ComputeVersion, Developer, License, Vcs}
+import scala.build.errors.{BuildException, MalformedInputError, UnexpectedDirectiveError}
+import scala.build.options.publish.ComputeVersion
 import scala.build.options.{
   BuildOptions,
   PostBuildOptions,
@@ -20,23 +14,24 @@ import scala.cli.signing.shared.PasswordOption
 
 case object UsingPublishContextualDirectiveHandler extends UsingDirectiveHandler {
 
-  private def prefix = "publish."
+  private def prefix   = "publish."
+  private def ciPrefix = "ci."
 
-  def name        = "Publish"
-  def description = "Set parameters for publishing (contextual)"
-  def usage       = s"//> using $prefix(organization|name|version) [value]"
+  def name        = "Publish (contextual)"
+  def description = "Set contextual parameters for publishing"
+  def usage       = s"//> using $prefix[ci.](computeVersion|repository|secretKey|…) [value]"
 
   override def usageMd =
-    s"""`//> using ${prefix}organization `"value"
-       |`//> using ${prefix}name `"value"
-       |`//> using ${prefix}version `"value"
+    s"""`//> using ${prefix}computeVersion `"value"
+       |`//> using ${prefix}ci.repository `"value"
+       |`//> using ${prefix}secretKey `"value"
        |""".stripMargin
 
   private def q = "\""
   override def examples = Seq(
-    s"//> using ${prefix}organization ${q}io.github.myself$q",
-    s"//> using ${prefix}name ${q}my-library$q",
-    s"//> using ${prefix}version ${q}0.1.1$q"
+    s"//> using ${prefix}computeVersion ${q}git:tag$q",
+    s"//> using ${prefix}ci.repository ${q}central-s01$q",
+    s"//> using ${prefix}secretKey ${q}env:PUBLISH_SECRET_KEY$q"
   )
   def keys = Seq(
     "computeVersion",
@@ -70,59 +65,50 @@ case object UsingPublishContextualDirectiveHandler extends UsingDirectiveHandler
     val severalValues = groupedScopedValuesContainer.scopedStringValues.map(_.positioned)
     val singleValue   = severalValues.head
 
-    val strippedKey =
-      if (scopedDirective.directive.key.startsWith(prefix))
-        scopedDirective.directive.key.stripPrefix(prefix)
+    val (strippedKey, isCi) =
+      if (scopedDirective.directive.key.startsWith(prefix)) {
+        val key = scopedDirective.directive.key.stripPrefix(prefix)
+        if (key.startsWith(ciPrefix)) (key.stripPrefix(ciPrefix), true)
+        else (key, false)
+      }
       else
         value(Left(new UnexpectedDirectiveError(scopedDirective.directive.key)))
 
-    val publishOptions = strippedKey match {
+    val publishContextualOptions = strippedKey match {
       case "computeVersion" | "compute-version" =>
         value {
           ComputeVersion.parse(singleValue).map {
             computeVersion =>
-              PublishOptions(
-                contextual = PublishContextualOptions(
-                  computeVersion = Some(
-                    computeVersion
-                  )
+              PublishContextualOptions(
+                computeVersion = Some(
+                  computeVersion
                 )
               )
           }
         }
       case "repository" =>
-        PublishOptions(contextual = PublishContextualOptions(repository = Some(singleValue.value)))
+        PublishContextualOptions(repository = Some(singleValue.value))
       case "gpgKey" | "gpg-key" =>
-        PublishOptions(contextual =
-          PublishContextualOptions(gpgSignatureId = Some(singleValue.value))
-        )
+        PublishContextualOptions(gpgSignatureId = Some(singleValue.value))
       case "gpgOptions" | "gpg-options" | "gpgOption" | "gpg-option" =>
-        PublishOptions(contextual =
-          PublishContextualOptions(gpgOptions = severalValues.map(_.value).toList)
-        )
+        PublishContextualOptions(gpgOptions = severalValues.map(_.value).toList)
       case "secretKey" =>
-        PublishOptions(contextual =
-          PublishContextualOptions(secretKey = Some(value(parsePasswordOption(singleValue.value))))
-        )
+        PublishContextualOptions(secretKey = Some(value(parsePasswordOption(singleValue.value))))
       case "secretKeyPassword" =>
-        PublishOptions(contextual =
-          PublishContextualOptions(secretKeyPassword =
-            Some(value(parsePasswordOption(singleValue.value)))
-          )
+        PublishContextualOptions(secretKeyPassword =
+          Some(value(parsePasswordOption(singleValue.value)))
         )
       case "user" =>
-        PublishOptions(contextual =
-          PublishContextualOptions(repoUser = Some(value(parsePasswordOption(singleValue.value))))
-        )
+        PublishContextualOptions(repoUser = Some(value(parsePasswordOption(singleValue.value))))
       case "password" =>
-        PublishOptions(contextual =
-          PublishContextualOptions(repoPassword =
-            Some(value(parsePasswordOption(singleValue.value)))
-          )
-        )
+        PublishContextualOptions(repoPassword = Some(value(parsePasswordOption(singleValue.value))))
       case _ =>
         value(Left(new UnexpectedDirectiveError(scopedDirective.directive.key)))
     }
+
+    val publishOptions =
+      if (isCi) PublishOptions(ci = publishContextualOptions)
+      else PublishOptions(local = publishContextualOptions)
 
     val options = BuildOptions(
       notForBloopOptions = PostBuildOptions(

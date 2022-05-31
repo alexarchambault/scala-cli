@@ -67,7 +67,8 @@ object PublishLocal extends ScalaCommand[PublishLocalOptions] {
       publishLocal = true,
       forceSigningBinary = options.sharedPublish.forceSigningBinary,
       parallelUpload = true,
-      options.watch.watch
+      options.watch.watch,
+      isCi = options.publishParams.isCi
     )
   }
 }
