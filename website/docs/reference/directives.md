@@ -107,6 +107,22 @@ Set the default platform to Scala.js or Scala Native
 
 ### Publish
 
+Set parameters for publishing (contextual)
+
+`//> using publish.organization `"value"
+`//> using publish.name `"value"
+`//> using publish.version `"value"
+
+
+#### Examples
+`//> using publish.organization "io.github.myself"`
+
+`//> using publish.name "my-library"`
+
+`//> using publish.version "0.1.1"`
+
+### Publish
+
 Set parameters for publishing
 
 `//> using publish.organization `"value"

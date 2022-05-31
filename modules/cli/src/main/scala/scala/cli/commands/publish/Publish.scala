@@ -30,7 +30,7 @@ import scala.build.errors.{BuildException, CompositeBuildException, NoMainClassF
 import scala.build.internal.Util
 import scala.build.internal.Util.ScalaDependencyOps
 import scala.build.options.publish.{ComputeVersion, Developer, License, Signer => PSigner, Vcs}
-import scala.build.options.{BuildOptions, ConfigMonoid, Scope}
+import scala.build.options.{BuildOptions, ConfigMonoid, PublishContextualOptions, Scope}
 import scala.cli.CurrentParams
 import scala.cli.commands.pgp.PgpExternalCommand
 import scala.cli.commands.publish.{PublishParamsOptions, PublishRepositoryOptions}
@@ -69,6 +69,35 @@ object Publish extends ScalaCommand[PublishOptions] {
     ivy2LocalLike: Option[Boolean]
   ): Either[BuildException, BuildOptions] = either {
     val baseOptions = shared.buildOptions()
+    val contextualOptions = PublishContextualOptions(
+      repository = publishRepo.publishRepository.filter(_.trim.nonEmpty),
+      repositoryIsIvy2LocalLike = ivy2LocalLike,
+      sourceJar = sharedPublish.sources,
+      docJar = sharedPublish.doc,
+      gpgSignatureId = sharedPublish.gpgKey.map(_.trim).filter(_.nonEmpty),
+      gpgOptions = sharedPublish.gpgOption,
+      secretKey = publishParams.secretKey,
+      secretKeyPassword = publishParams.secretKeyPassword,
+      repoUser = publishRepo.user,
+      repoPassword = publishRepo.password,
+      signer = value {
+        sharedPublish.signer
+          .map(Positioned.commandLine(_))
+          .map(PSigner.parse(_))
+          .sequence
+      },
+      computeVersion = value {
+        publishParams.computeVersion
+          .map(Positioned.commandLine(_))
+          .map(ComputeVersion.parse(_))
+          .sequence
+      },
+      checksums = {
+        val input = sharedPublish.checksum.flatMap(_.split(",")).map(_.trim).filter(_.nonEmpty)
+        if (input.isEmpty) None
+        else Some(input)
+      }
+    )
     baseOptions.copy(
       mainClass = mainClass.mainClass.filter(_.nonEmpty),
       notForBloopOptions = baseOptions.notForBloopOptions.copy(
@@ -107,33 +136,10 @@ object Publish extends ScalaCommand[PublishOptions] {
           },
           scalaVersionSuffix = sharedPublish.scalaVersionSuffix.map(_.trim),
           scalaPlatformSuffix = sharedPublish.scalaPlatformSuffix.map(_.trim),
-          repository = publishRepo.publishRepository.filter(_.trim.nonEmpty),
-          repositoryIsIvy2LocalLike = ivy2LocalLike,
-          sourceJar = sharedPublish.sources,
-          docJar = sharedPublish.doc,
-          gpgSignatureId = sharedPublish.gpgKey.map(_.trim).filter(_.nonEmpty),
-          gpgOptions = sharedPublish.gpgOption,
-          secretKey = publishParams.secretKey,
-          secretKeyPassword = publishParams.secretKeyPassword,
-          repoUser = publishRepo.user,
-          repoPassword = publishRepo.password,
-          signer = value {
-            sharedPublish.signer
-              .map(Positioned.commandLine(_))
-              .map(PSigner.parse(_))
-              .sequence
-          },
-          computeVersion = value {
-            publishParams.computeVersion
-              .map(Positioned.commandLine(_))
-              .map(ComputeVersion.parse(_))
-              .sequence
-          },
-          checksums = {
-            val input = sharedPublish.checksum.flatMap(_.split(",")).map(_.trim).filter(_.nonEmpty)
-            if (input.isEmpty) None
-            else Some(input)
-          }
+          contextual = ConfigMonoid.sum(Seq(
+            baseOptions.notForBloopOptions.publishOptions.contextual,
+            contextualOptions
+          ))
         )
       )
     )
@@ -362,7 +368,7 @@ object Publish extends ScalaCommand[PublishOptions] {
       case Some(ver0) => ver0.value
       case None =>
         value {
-          publishOptions.computeVersion match {
+          publishOptions.contextual.computeVersion match {
             case Some(cv) => cv.get(build.inputs.workspace)
             case None     => defaultVersion
           }
@@ -388,7 +394,7 @@ object Publish extends ScalaCommand[PublishOptions] {
     }
 
     val sourceJarOpt =
-      if (publishOptions.sourceJar.getOrElse(true)) {
+      if (publishOptions.contextual.sourceJar.getOrElse(true)) {
         val content   = PackageCmd.sourceJar(build, now.toEpochMilli)
         val sourceJar = workingDir / org / s"$moduleName-$ver-sources.jar"
         os.write(sourceJar, content, createFolders = true)
@@ -398,7 +404,7 @@ object Publish extends ScalaCommand[PublishOptions] {
         None
 
     val docJarOpt =
-      if (publishOptions.docJar.getOrElse(true))
+      if (publishOptions.contextual.docJar.getOrElse(true))
         docBuildOpt match {
           case None => None
           case Some(docBuild) =>
@@ -566,8 +572,8 @@ object Publish extends ScalaCommand[PublishOptions] {
         Executors.newSingleThreadScheduledExecutor(Util.daemonThreadFactory("publish-retry"))
 
       lazy val authOpt = {
-        val userOpt     = publishOptions.repoUser
-        val passwordOpt = publishOptions.repoPassword.map(_.get())
+        val userOpt     = publishOptions.contextual.repoUser
+        val passwordOpt = publishOptions.contextual.repoPassword.map(_.get())
         passwordOpt.map { password =>
           Authentication(userOpt.fold("")(_.get().value), password.value)
         }
@@ -606,7 +612,7 @@ object Publish extends ScalaCommand[PublishOptions] {
       if (publishLocal)
         ivy2Local
       else
-        publishOptions.repository match {
+        publishOptions.contextual.repository match {
           case None =>
             value(Left(new MissingPublishOptionError(
               "repository",
@@ -620,8 +626,8 @@ object Publish extends ScalaCommand[PublishOptions] {
           case Some("central-s01" | "maven-central-s01" | "mvn-central-s01") =>
             centralRepo("https://s01.oss.sonatype.org")
           case Some(repoStr) =>
-            val userOpt     = publishOptions.repoUser.map(_.get())
-            val passwordOpt = publishOptions.repoPassword.map(_.get())
+            val userOpt     = publishOptions.contextual.repoUser.map(_.get())
+            val passwordOpt = publishOptions.contextual.repoPassword.map(_.get())
 
             val authOpt =
               if (userOpt.isDefined || passwordOpt.isDefined) {
@@ -649,7 +655,7 @@ object Publish extends ScalaCommand[PublishOptions] {
               PublishRepository.Simple(repo0),
               None,
               Hooks.dummy,
-              publishOptions.repositoryIsIvy2LocalLike.getOrElse(false)
+              publishOptions.contextual.repositoryIsIvy2LocalLike.getOrElse(false)
             )
         }
     }
@@ -678,23 +684,23 @@ object Publish extends ScalaCommand[PublishOptions] {
         }
     }
 
-    val signerOpt = publishOptions.signer.orElse {
-      if (publishOptions.secretKey.isDefined) Some(PSigner.BouncyCastle)
-      else if (publishOptions.gpgSignatureId.isDefined) Some(PSigner.Gpg)
+    val signerOpt = publishOptions.contextual.signer.orElse {
+      if (publishOptions.contextual.secretKey.isDefined) Some(PSigner.BouncyCastle)
+      else if (publishOptions.contextual.gpgSignatureId.isDefined) Some(PSigner.Gpg)
       else None
     }
     val signer: Signer = signerOpt match {
       case Some(PSigner.Gpg) =>
-        publishOptions.gpgSignatureId match {
+        publishOptions.contextual.gpgSignatureId match {
           case Some(gpgSignatureId) =>
             GpgSigner(
               GpgSigner.Key.Id(gpgSignatureId),
-              extraOptions = publishOptions.gpgOptions
+              extraOptions = publishOptions.contextual.gpgOptions
             )
           case None => NopSigner
         }
       case Some(PSigner.BouncyCastle) =>
-        publishOptions.secretKey match {
+        publishOptions.contextual.secretKey match {
           case Some(secretKey) =>
             val getLauncher: Supplier[NioPath] = { () =>
               val archiveCache = builds.headOption
@@ -707,14 +713,14 @@ object Publish extends ScalaCommand[PublishOptions] {
             }
             if (forceSigningBinary)
               (new scala.cli.internal.BouncycastleSignerMakerSubst).get(
-                publishOptions.secretKeyPassword.orNull,
+                publishOptions.contextual.secretKeyPassword.orNull,
                 secretKey,
                 getLauncher,
                 logger
               )
             else
               (new BouncycastleSignerMaker).get(
-                publishOptions.secretKeyPassword.orNull,
+                publishOptions.contextual.secretKeyPassword.orNull,
                 secretKey,
                 getLauncher,
                 logger
@@ -750,7 +756,7 @@ object Publish extends ScalaCommand[PublishOptions] {
 
     val checksumLogger =
       new InteractiveChecksumLogger(new OutputStreamWriter(System.err), verbosity = 1)
-    val checksumTypes = publishOptions.checksums match {
+    val checksumTypes = publishOptions.contextual.checksums match {
       case None              => Seq(ChecksumType.MD5, ChecksumType.SHA1)
       case Some(Seq("none")) => Nil
       case Some(inputs) =>
