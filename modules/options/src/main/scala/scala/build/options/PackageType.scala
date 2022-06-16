@@ -16,8 +16,8 @@ object PackageType {
     override def sourceBased = true
   }
   case object DocJar extends PackageType
-  case object Assembly extends PackageType {
-    override def runnable = Some(true)
+  final case class Assembly(addPreamble: Boolean) extends PackageType {
+    override def runnable = Some(addPreamble)
   }
   case object Js extends PackageType
   case object Native extends PackageType {

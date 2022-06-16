@@ -847,6 +847,10 @@ Generate a scaladoc JAR rather than an executable JAR
 
 Generate an assembly JAR
 
+#### `--preamble`
+
+For assembly JAR, whether to add a bash / bat preamble
+
 #### `--standalone`
 
 Package standalone JARs

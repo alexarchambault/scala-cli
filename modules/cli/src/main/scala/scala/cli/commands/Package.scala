@@ -188,7 +188,7 @@ object Package extends ScalaCommand[PackageOptions] {
       case PackageType.LibraryJar                             => ".jar"
       case PackageType.SourceJar                              => ".jar"
       case PackageType.DocJar                                 => ".jar"
-      case PackageType.Assembly                               => ".jar"
+      case _: PackageType.Assembly                            => ".jar"
       case PackageType.Js                                     => ".js"
       case PackageType.Debian                                 => ".deb"
       case PackageType.Dmg                                    => ".dmg"
@@ -204,7 +204,7 @@ object Package extends ScalaCommand[PackageOptions] {
       case PackageType.LibraryJar                             => "library.jar"
       case PackageType.SourceJar                              => "source.jar"
       case PackageType.DocJar                                 => "scaladoc.jar"
-      case PackageType.Assembly                               => "app.jar"
+      case _: PackageType.Assembly                            => "app.jar"
       case PackageType.Js                                     => "app.js"
       case PackageType.Debian                                 => "app.deb"
       case PackageType.Dmg                                    => "app.dmg"
@@ -279,13 +279,14 @@ object Package extends ScalaCommand[PackageOptions] {
         if (force) os.copy.over(docJarPath, destPath)
         else os.copy(docJarPath, destPath)
         destPath
-      case PackageType.Assembly =>
+      case a: PackageType.Assembly =>
         value {
           assembly(
             build,
             destPath,
             value(mainClass),
             provided,
+            withPreamble = a.addPreamble,
             () => alreadyExistsCheck(),
             logger
           )
@@ -683,6 +684,7 @@ object Package extends ScalaCommand[PackageOptions] {
     destPath: os.Path,
     mainClass: String,
     provided: Seq[dependency.AnyModule],
+    withPreamble: Boolean,
     alreadyExistsCheck: () => Unit,
     logger: Logger
   ): Either[BuildException, Unit] = either {
@@ -706,14 +708,20 @@ object Package extends ScalaCommand[PackageOptions] {
         allFiles.filterNot(providedFiles0)
       }
 
-    val preamble = Preamble()
-      .withOsKind(Properties.isWin)
-      .callsItself(Properties.isWin)
+    val preambleOpt =
+      if (withPreamble)
+        Some {
+          Preamble()
+            .withOsKind(Properties.isWin)
+            .callsItself(Properties.isWin)
+        }
+      else
+        None
     val params = Parameters.Assembly()
       .withExtraZipEntries(byteCodeZipEntries)
       .withFiles(files.map(_.toIO))
       .withMainClass(mainClass)
-      .withPreamble(preamble)
+      .withPreambleOpt(preambleOpt)
     alreadyExistsCheck()
     AssemblyGenerator.generate(params, destPath.toNIO)
     ProcUtil.maybeUpdatePreamble(destPath)
