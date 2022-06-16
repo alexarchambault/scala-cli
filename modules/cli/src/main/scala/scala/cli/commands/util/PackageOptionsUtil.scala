@@ -2,7 +2,9 @@ package scala.cli.commands
 package util
 
 import scala.build.BuildThreads
+import scala.build.Ops._
 import scala.build.compiler.{ScalaCompilerMaker, SimpleScalaCompilerMaker}
+import scala.build.errors.{BuildException, CompositeBuildException, ModuleFormatError}
 import scala.build.options._
 import scala.build.options.packaging._
 import scala.cli.commands.PackageOptions
@@ -28,6 +30,15 @@ object PackageOptionsUtil {
     def forcedPackageTypeOpt: Option[PackageType] =
       if (doc) Some(PackageType.DocJar)
       else None
+
+    def providedModules: Either[BuildException, Seq[dependency.AnyModule]] =
+      provided
+        .map { str =>
+          dependency.parser.ModuleParser.parse(str)
+            .left.map(err => new ModuleFormatError(str, err))
+        }
+        .sequence
+        .left.map(CompositeBuildException(_))
 
     def buildOptions: BuildOptions = {
       val baseOptions = shared.buildOptions()
@@ -76,6 +87,10 @@ object PackageOptionsUtil {
             ),
             useDefaultScaladocOptions = defaultScaladocOptions
           )
+        ),
+        internal = baseOptions.internal.copy(
+          // computing the provided modules sub-graph need the final Resolution instance
+          keepResolution = provided.nonEmpty
         )
       )
     }

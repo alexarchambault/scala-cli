@@ -875,6 +875,10 @@ Build pkg package, available only on macOS
 
 Build Docker image
 
+#### `--provided`
+
+Exclude modules *and their transitive dependencies* from the JAR to be packaged
+
 #### `--default-scaladoc-options`
 
 Aliases: `--default-scaladoc-opts`
