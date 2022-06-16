@@ -42,6 +42,9 @@ final case class PackageOptions(
   @HelpMessage("For assembly JAR, whether to add a bash / bat preamble")
     preamble: Boolean = true,
   @Group("Package")
+  @HelpMessage("Generate an assembly JAR for Spark")
+    spark: Boolean = false,
+  @Group("Package")
   @HelpMessage("Package standalone JARs")
     standalone: Option[Boolean] = None,
   @Recurse

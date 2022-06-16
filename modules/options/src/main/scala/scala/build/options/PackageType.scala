@@ -19,6 +19,9 @@ object PackageType {
   final case class Assembly(addPreamble: Boolean) extends PackageType {
     override def runnable = Some(addPreamble)
   }
+  case object Spark extends PackageType {
+    override def runnable = Some(false)
+  }
   case object Js extends PackageType
   case object Native extends PackageType {
     override def runnable = Some(true)

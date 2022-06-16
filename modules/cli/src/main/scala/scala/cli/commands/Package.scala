@@ -30,6 +30,7 @@ import scala.build.internal.{Runner, ScalaJsLinkerConfig}
 import scala.build.options.{PackageType, Platform}
 import scala.cli.CurrentParams
 import scala.cli.commands.OptionsHelper._
+import scala.cli.commands.packaging.Spark
 import scala.cli.commands.util.PackageOptionsUtil._
 import scala.cli.commands.util.SharedOptionsUtil._
 import scala.cli.errors.ScalaJsLinkingError
@@ -189,6 +190,7 @@ object Package extends ScalaCommand[PackageOptions] {
       case PackageType.SourceJar                              => ".jar"
       case PackageType.DocJar                                 => ".jar"
       case _: PackageType.Assembly                            => ".jar"
+      case PackageType.Spark                                  => ".jar"
       case PackageType.Js                                     => ".js"
       case PackageType.Debian                                 => ".deb"
       case PackageType.Dmg                                    => ".dmg"
@@ -205,6 +207,7 @@ object Package extends ScalaCommand[PackageOptions] {
       case PackageType.SourceJar                              => "source.jar"
       case PackageType.DocJar                                 => "scaladoc.jar"
       case _: PackageType.Assembly                            => "app.jar"
+      case PackageType.Spark                                  => "job.jar"
       case PackageType.Js                                     => "app.js"
       case PackageType.Debian                                 => "app.deb"
       case PackageType.Dmg                                    => "app.dmg"
@@ -287,6 +290,23 @@ object Package extends ScalaCommand[PackageOptions] {
             value(mainClass),
             provided,
             withPreamble = a.addPreamble,
+            () => alreadyExistsCheck(),
+            logger
+          )
+        }
+        destPath
+      case PackageType.Spark =>
+        value {
+          assembly(
+            build,
+            destPath,
+            value(mainClass),
+            // The Spark modules are assumed to be already on the class path,
+            // along with all their transitive dependencies (originating from
+            // the Spark distribution), so we don't include any of them in the
+            // assembly.
+            provided ++ Spark.sparkModules,
+            withPreamble = false,
             () => alreadyExistsCheck(),
             logger
           )

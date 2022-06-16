@@ -851,6 +851,10 @@ Generate an assembly JAR
 
 For assembly JAR, whether to add a bash / bat preamble
 
+#### `--spark`
+
+Generate an assembly JAR for Spark
+
 #### `--standalone`
 
 Package standalone JARs
