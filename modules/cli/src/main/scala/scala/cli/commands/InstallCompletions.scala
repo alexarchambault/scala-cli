@@ -6,6 +6,7 @@ import caseapp.core.complete.{Bash, Zsh}
 import java.io.File
 import java.nio.charset.Charset
 import java.util.Arrays
+import java.util.regex.Pattern
 
 import scala.cli.CurrentParams
 import scala.cli.commands.util.CommonOps._
@@ -37,7 +38,7 @@ object InstallCompletions extends ScalaCommand[InstallCompletionsOptions] {
 
     val format = options.format.map(_.trim).filter(_.nonEmpty)
       .orElse {
-        Option(System.getenv("SHELL")).map(_.split(File.separator).last).map {
+        Option(System.getenv("SHELL")).map(_.split(Pattern.quote(File.separator)).last).map {
           case "bash" => Bash.id
           case "zsh"  => Zsh.id
           case other  => other
