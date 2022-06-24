@@ -80,7 +80,7 @@ object ScalaCli {
   def main(args: Array[String]): Unit =
     try main0(args)
     catch {
-      case e: Throwable if !isCI && !printStackTraces =>
+      case e: Throwable if false && !isCI && !printStackTraces =>
         val workspace = CurrentParams.workspaceOpt.getOrElse(os.pwd)
         val dir       = workspace / Constants.workspaceDirName / "stacktraces"
         os.makeDir.all(dir)
