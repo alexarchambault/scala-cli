@@ -777,6 +777,7 @@ trait FormatNativeImageConf extends JavaModule {
 
 trait ScalaCliCompile extends scala.cli.mill.ScalaCliCompile {
   def scalaCliVersion = BuildDeps.scalaCliVersion
+  def enableScalaCli  = !Properties.isWin
 }
 
 trait ScalaCliScalafixModule extends ScalafixModule with ScalaCliCompile {
