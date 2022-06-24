@@ -163,7 +163,7 @@ object SharedCompilationServerOptionsUtil {
           bloopDaemonDir.filter(_.nonEmpty)
         ) match {
           case (_, _, Some(path)) =>
-            BloopRifleConfig.Address.DomainSocket(Paths.get(path))
+            BloopRifleConfig.Address.DomainSocket(Paths.get(path).toAbsolutePath)
           case (None, None, None) =>
             val isBloopMainLine = Ver(retainedBloopVersion.version.raw) < Ver("1.4.12")
             if (isBloopMainLine)
