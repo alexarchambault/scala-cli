@@ -123,6 +123,8 @@ class SparkTests212 extends SparkTestDefinitions {
 
   def simpleRunStandaloneSparkJobTest(spark: Spark): Unit =
     simpleJobInputs(spark).fromRoot { root =>
+      os.proc(TestUtil.cli, "run", extraOptions, "--spark-standalone", "--jvm", "8", ".", "-v", "-v", "-v")
+        .call(cwd = root, stdin = os.Inherit, stdout = os.Inherit)
       val res = os.proc(TestUtil.cli, "run", extraOptions, "--spark-standalone", "--jvm", "8", ".")
         .call(cwd = root)
 
