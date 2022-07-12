@@ -47,6 +47,9 @@ object Run extends ScalaCommand[RunOptions] {
         javaOpts =
           baseOptions.javaOptions.javaOpts ++
             sharedJava.allJavaOpts.map(JavaOpt(_)).map(Positioned.commandLine)
+          ),
+      notForBloopOptions = baseOptions.notForBloopOptions.copy(
+        runWithManifest = options.useManifest
       )
     )
   }
