@@ -12,7 +12,7 @@ object ManifestJar {
     val manifest   = new Manifest
     val attributes = manifest.getMainAttributes
     attributes.put(Attributes.Name.MANIFEST_VERSION, "1.0")
-    attributes.put(Attributes.Name.CLASS_PATH, classPath.map(_.toString).mkString(" "))
+    attributes.put(Attributes.Name.CLASS_PATH, classPath.map(_.toNIO.toUri.getRawPath).mkString(" "))
     val jarFile = scratchDirOpt match {
       case Some(scratchDir) =>
         os.makeDir.all(scratchDir)
