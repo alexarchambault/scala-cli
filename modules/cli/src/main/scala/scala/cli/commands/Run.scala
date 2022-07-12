@@ -410,7 +410,7 @@ object Run extends ScalaCommand[RunOptions] {
                 .map(_ / "bin" / s"spark-submit$ext")
                 .filter(os.exists(_))
                 .map(_.toString)
-                .getOrElse("spark-submit")
+                .getOrElse(s"spark-submit$ext")
             val jarsArgs =
               if (depCp.isEmpty) Nil
               else Seq("--jars", depCp.mkString(","))
