@@ -851,7 +851,7 @@ object Build {
       artifacts.javacPluginDependencies.map(_._3) ++
       artifacts.extraJavacPlugins
 
-    val project = Project(
+    Project(
       directory = inputs.workspace / Constants.workspaceDirName,
       workspace = inputs.workspace,
       classesDir = classesDir0,
@@ -873,7 +873,6 @@ object Build {
       javaHomeOpt = Option(options.javaHomeLocation().value),
       javacOptions = javacOptions
     )
-    project
   }
 
   def prepareBuild(

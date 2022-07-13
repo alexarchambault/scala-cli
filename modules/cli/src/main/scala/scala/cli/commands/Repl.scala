@@ -216,7 +216,7 @@ object Repl extends ScalaCommand[ReplOptions] {
       .map(_.last.stripSuffix(".class"))
       .sorted
     val warnRootClasses = rootClasses.nonEmpty &&
-      options.notForBloopOptions.replOptions.useAmmoniteOpt.exists(_ == true)
+      options.notForBloopOptions.replOptions.useAmmonite
     if (warnRootClasses)
       logger.message(
         s"Warning: found classes defined in the root package (${rootClasses.mkString(", ")})." +
