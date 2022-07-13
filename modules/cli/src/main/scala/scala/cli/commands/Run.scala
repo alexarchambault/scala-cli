@@ -28,9 +28,9 @@ object Run extends ScalaCommand[RunOptions] {
 
   private def runMode(options: RunOptions): RunMode =
     if (options.standaloneSpark.getOrElse(false) && !options.sparkSubmit.contains(false))
-      RunMode.StandaloneSparkSubmit
+      RunMode.StandaloneSparkSubmit(Nil, Nil)
     else if (options.sparkSubmit.getOrElse(false))
-      RunMode.SparkSubmit
+      RunMode.SparkSubmit(Nil, Nil)
     else if (options.hadoopJar)
       RunMode.HadoopJar
     else
@@ -65,7 +65,7 @@ object Run extends ScalaCommand[RunOptions] {
             sharedJava.allJavaOpts.map(JavaOpt(_)).map(Positioned.commandLine),
         jvmIdOpt = baseOptions.javaOptions.jvmIdOpt.orElse {
           runMode(options) match {
-            case RunMode.StandaloneSparkSubmit | RunMode.SparkSubmit | RunMode.HadoopJar =>
+            case _: RunMode.Spark | RunMode.HadoopJar =>
               Some("8")
             case RunMode.Default => None
           }
@@ -74,7 +74,7 @@ object Run extends ScalaCommand[RunOptions] {
       internalDependencies = baseOptions.internalDependencies.copy(
         addRunnerDependencyOpt = baseOptions.internalDependencies.addRunnerDependencyOpt.orElse {
           runMode(options) match {
-            case RunMode.StandaloneSparkSubmit | RunMode.SparkSubmit | RunMode.HadoopJar =>
+            case _: RunMode.Spark | RunMode.HadoopJar =>
               Some(false)
             case RunMode.Default => None
           }
@@ -83,8 +83,8 @@ object Run extends ScalaCommand[RunOptions] {
       internal = baseOptions.internal.copy(
         keepResolution = baseOptions.internal.keepResolution || {
           runMode(options) match {
-            case RunMode.StandaloneSparkSubmit | RunMode.SparkSubmit | RunMode.HadoopJar => true
-            case RunMode.Default                                                         => false
+            case _: RunMode.Spark | RunMode.HadoopJar => true
+            case RunMode.Default                      => false
           }
         }
       ),
@@ -298,7 +298,7 @@ object Run extends ScalaCommand[RunOptions] {
     value(res)
   }
 
-  private def runOnce(
+  def runOnce(
     build: Build.Successful,
     mainClass: String,
     args: Seq[String],
@@ -402,12 +402,11 @@ object Run extends ScalaCommand[RunOptions] {
               )
               Right((proc, None))
             }
-          case RunMode.SparkSubmit =>
+          case mode: RunMode.SparkSubmit =>
             // FIXME Get Spark.sparkModules via provided settings?
             val providedModules = Spark.sparkModules
             val providedFiles =
               value(PackageCmd.providedFiles(build, providedModules, logger)).toSet
-            val customSubmitOptions: Seq[String] = Nil // ???
             val depCp        = build.dependencyClassPath.filterNot(providedFiles)
             val javaHomeInfo = build.options.javaHome().value
             val javaOpts     = build.options.javaOptions.javaOpts.toSeq.map(_.value.value)
@@ -436,7 +435,7 @@ object Run extends ScalaCommand[RunOptions] {
               Seq(submitCommand, "--class", mainClass) ++
                 jarsArgs ++
                 javaOpts.flatMap(opt => Seq("--driver-java-options", opt)) ++
-                customSubmitOptions ++
+                mode.submitArgs ++
                 Seq(library.toString) ++
                 args
             val envUpdates = javaHomeInfo.envUpdates(sys.env)
@@ -454,7 +453,7 @@ object Run extends ScalaCommand[RunOptions] {
                 else None
               ))
             }
-          case RunMode.StandaloneSparkSubmit =>
+          case mode: RunMode.StandaloneSparkSubmit =>
             // FIXME Get Spark.sparkModules via provided settings?
             val providedModules = Spark.sparkModules
             val sparkClassPath  = value(PackageCmd.providedFiles(build, providedModules, logger))
@@ -468,11 +467,10 @@ object Run extends ScalaCommand[RunOptions] {
               suffix = ".jar"
             )
 
-            val customSubmitOptions: Seq[String] = Nil // ???
-            val finalMainClass                   = "org.apache.spark.deploy.SparkSubmit"
-            val depCp        = build.dependencyClassPath.filterNot(sparkClassPath.toSet)
-            val javaHomeInfo = build.options.javaHome().value
-            val javaOpts     = build.options.javaOptions.javaOpts.toSeq.map(_.value.value)
+            val finalMainClass = "org.apache.spark.deploy.SparkSubmit"
+            val depCp          = build.dependencyClassPath.filterNot(sparkClassPath.toSet)
+            val javaHomeInfo   = build.options.javaHome().value
+            val javaOpts       = build.options.javaOptions.javaOpts.toSeq.map(_.value.value)
             val jarsArgs =
               if (depCp.isEmpty) Nil
               else Seq("--jars", depCp.mkString(","))
@@ -480,7 +478,7 @@ object Run extends ScalaCommand[RunOptions] {
               Seq("--class", mainClass) ++
                 jarsArgs ++
                 javaOpts.flatMap(opt => Seq("--driver-java-options", opt)) ++
-                customSubmitOptions ++
+                mode.submitArgs ++
                 Seq(library.toString) ++
                 args
             val envUpdates = javaHomeInfo.envUpdates(sys.env)
@@ -488,7 +486,7 @@ object Run extends ScalaCommand[RunOptions] {
               val command = Runner.jvmCommand(
                 javaHomeInfo.javaCommand,
                 javaOpts,
-                sparkClassPath,
+                library +: sparkClassPath,
                 finalMainClass,
                 finalArgs,
                 extraEnv = envUpdates,
@@ -501,7 +499,7 @@ object Run extends ScalaCommand[RunOptions] {
               val proc = Runner.runJvm(
                 javaHomeInfo.javaCommand,
                 javaOpts,
-                sparkClassPath,
+                library +: sparkClassPath,
                 finalMainClass,
                 finalArgs,
                 logger,
