@@ -193,7 +193,8 @@ object Build {
         Sources.defaultPreprocessors(
           options.scriptOptions.codeWrapper.getOrElse(CustomCodeWrapper),
           options.archiveCache,
-          options.internal.javaClassNameVersionOpt
+          options.internal.javaClassNameVersionOpt,
+          () => options.javaHome().value.javaCommand
         ),
         logger
       )

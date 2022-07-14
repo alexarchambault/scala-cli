@@ -31,7 +31,8 @@ object ThrowawayPgpSecret {
     mail: String,
     password: Secret[String],
     logger: Logger,
-    cache: Cache[Task]
+    cache: Cache[Task],
+    javaCommand: () => String
   ): Either[BuildException, (Secret[String], Secret[Array[Byte]])] = either {
 
     val dir    = os.temp.dir(perms = "rwx------")
@@ -45,7 +46,8 @@ object ThrowawayPgpSecret {
         logger.verbosity <= 0,
         password.value,
         cache,
-        logger
+        logger,
+        javaCommand
       )
     }
 
