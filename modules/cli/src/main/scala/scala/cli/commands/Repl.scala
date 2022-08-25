@@ -14,6 +14,7 @@ import scala.build.options.{BuildOptions, JavaOpt, Scope}
 import scala.cli.CurrentParams
 import scala.cli.commands.Run.{maybePrintSimpleScalacOutput, orPythonDetectionError}
 import scala.cli.commands.publish.ConfigUtil._
+import scala.cli.commands.run.RunMode
 import scala.cli.commands.util.CommonOps._
 import scala.cli.commands.util.SharedOptionsUtil._
 import scala.cli.config.{ConfigDb, Keys}
@@ -69,6 +70,9 @@ object Repl extends ScalaCommand[ReplOptions] {
     )
   }
 
+  private def runMode(options: ReplOptions): RunMode.HasRepl =
+    RunMode.Default
+
   def run(options: ReplOptions, args: RemainingArgs): Unit = {
     CurrentParams.verbosity = options.shared.logging.verbosity
     def default = Inputs.default().getOrElse {
@@ -105,6 +109,7 @@ object Repl extends ScalaCommand[ReplOptions] {
       artifacts: Artifacts,
       classDir: Option[os.Path],
       allowExit: Boolean,
+      runMode: RunMode.HasRepl,
       buildOpt: Option[Build.Successful]
     ): Unit = {
       val res = runRepl(
@@ -116,6 +121,7 @@ object Repl extends ScalaCommand[ReplOptions] {
         logger,
         allowExit = allowExit,
         options.sharedRepl.replDryRun,
+        runMode,
         buildOpt
       )
       res match {
@@ -127,13 +133,15 @@ object Repl extends ScalaCommand[ReplOptions] {
     }
     def doRunReplFromBuild(
       build: Build.Successful,
-      allowExit: Boolean
+      allowExit: Boolean,
+      runMode: RunMode.HasRepl
     ): Unit =
       doRunRepl(
         build.options,
         build.artifacts,
         build.outputOpt,
         allowExit,
+        runMode,
         Some(build)
       )
 
@@ -151,6 +159,7 @@ object Repl extends ScalaCommand[ReplOptions] {
         artifacts,
         None,
         allowExit = !options.sharedRepl.watch.watchMode,
+        runMode = runMode(options),
         buildOpt = None
       )
       if (options.sharedRepl.watch.watchMode) {
@@ -174,9 +183,10 @@ object Repl extends ScalaCommand[ReplOptions] {
       ) { res =>
         for (builds <- res.orReport(logger))
           builds.main match {
-            case s: Build.Successful => doRunReplFromBuild(s, allowExit = false)
-            case _: Build.Failed     => buildFailed(allowExit = false)
-            case _: Build.Cancelled  => buildCancelled(allowExit = false)
+            case s: Build.Successful =>
+              doRunReplFromBuild(s, allowExit = false, runMode = runMode(options))
+            case _: Build.Failed    => buildFailed(allowExit = false)
+            case _: Build.Cancelled => buildCancelled(allowExit = false)
           }
       }
       try WatchUtil.waitForCtrlC()
@@ -197,9 +207,10 @@ object Repl extends ScalaCommand[ReplOptions] {
         )
           .orExit(logger)
       builds.main match {
-        case s: Build.Successful => doRunReplFromBuild(s, allowExit = true)
-        case _: Build.Failed     => buildFailed(allowExit = true)
-        case _: Build.Cancelled  => buildCancelled(allowExit = true)
+        case s: Build.Successful =>
+          doRunReplFromBuild(s, allowExit = true, runMode = runMode(options))
+        case _: Build.Failed    => buildFailed(allowExit = true)
+        case _: Build.Cancelled => buildCancelled(allowExit = true)
       }
     }
   }
@@ -222,6 +233,7 @@ object Repl extends ScalaCommand[ReplOptions] {
     logger: Logger,
     allowExit: Boolean,
     dryRun: Boolean,
+    runMode: RunMode.HasRepl,
     buildOpt: Option[Build.Successful]
   ): Either[BuildException, Unit] = either {
 
@@ -377,16 +389,20 @@ object Repl extends ScalaCommand[ReplOptions] {
         case other => other
       }
 
-    if (shouldUseAmmonite) {
-      val replArtifacts = value(ammoniteArtifacts())
-      val replArgs      = ammoniteAdditionalArgs() ++ programArgs
-      maybeRunRepl(replArtifacts, replArgs)
-    }
-    else {
-      val replArtifacts = value(defaultArtifacts())
-      val replArgs      = additionalArgs ++ programArgs
-      maybeRunRepl(replArtifacts, replArgs)
-    }
+    if (shouldUseAmmonite)
+      runMode match {
+        case RunMode.Default =>
+          val replArtifacts = value(ammoniteArtifacts())
+          val replArgs      = ammoniteAdditionalArgs() ++ programArgs
+          maybeRunRepl(replArtifacts, replArgs)
+      }
+    else
+      runMode match {
+        case RunMode.Default =>
+          val replArtifacts = value(defaultArtifacts())
+          val replArgs      = additionalArgs ++ programArgs
+          maybeRunRepl(replArtifacts, replArgs)
+      }
   }
 
   final class ReplError(retCode: Int)
