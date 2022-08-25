@@ -71,7 +71,7 @@ object Run extends ScalaCommand[RunOptions] with BuildCommandHelpers {
             sharedJava.allJavaOpts.map(JavaOpt(_)).map(Positioned.commandLine),
         jvmIdOpt = baseOptions.javaOptions.jvmIdOpt.orElse {
           runMode(options) match {
-            case RunMode.StandaloneSparkSubmit | RunMode.SparkSubmit | RunMode.HadoopJar =>
+            case _: RunMode.Spark | RunMode.HadoopJar =>
               Some("8")
             case RunMode.Default => None
           }
@@ -80,7 +80,7 @@ object Run extends ScalaCommand[RunOptions] with BuildCommandHelpers {
       internalDependencies = baseOptions.internalDependencies.copy(
         addRunnerDependencyOpt = baseOptions.internalDependencies.addRunnerDependencyOpt.orElse {
           runMode(options) match {
-            case RunMode.StandaloneSparkSubmit | RunMode.SparkSubmit | RunMode.HadoopJar =>
+            case _: RunMode.Spark | RunMode.HadoopJar =>
               Some(false)
             case RunMode.Default => None
           }
@@ -89,8 +89,8 @@ object Run extends ScalaCommand[RunOptions] with BuildCommandHelpers {
       internal = baseOptions.internal.copy(
         keepResolution = baseOptions.internal.keepResolution || {
           runMode(options) match {
-            case RunMode.StandaloneSparkSubmit | RunMode.SparkSubmit | RunMode.HadoopJar => true
-            case RunMode.Default                                                         => false
+            case _: RunMode.Spark | RunMode.HadoopJar => true
+            case RunMode.Default                      => false
           }
         }
       ),
