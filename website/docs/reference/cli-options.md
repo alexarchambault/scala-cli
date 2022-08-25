@@ -1002,6 +1002,24 @@ Aliases: `-a`
 [Internal]
 Don't actually run the REPL, just fetch it
 
+### `--spark`
+
+[Internal]
+Run Spark REPL, using a vanilla Spark distribution downloaded by Scala CLI
+
+### `--standalone-spark`
+
+Aliases: `--spark-standalone`
+
+[Internal]
+Run Spark REPL
+
+### `--predef`
+
+Aliases: `--preload`, `-I`
+
+Preload file
+
 ## Run options
 
 Available in commands:
