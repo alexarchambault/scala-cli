@@ -313,30 +313,34 @@ object Artifacts {
       )
     }
 
-    val (hasRunner, extraStubsJars) =
+    val extraStubsJars =
       if (scalaOpt.nonEmpty) {
-        val stubsJars =
-          // stubs add classes for 'import $ivy' and 'import $dep' to work
-          // we only need those in Scala sources, not in pure Java projects
-          if (addStubs) {
-            val maybeSnapshotRepo =
-              if (stubsVersion.endsWith("SNAPSHOT"))
-                Seq(coursier.Repositories.sonatype("snapshots").root)
-              else Nil
-            value {
-              artifacts(
-                Positioned.none(Seq(dep"$stubsOrganization:$stubsModuleName:$stubsVersion")),
-                allExtraRepositories,
-                scalaArtifactsParamsOpt.map(_.params),
-                logger,
-                cache.withMessage("Downloading internal stub dependency")
-              ).map(_.map(_._2))
-            }
+        // stubs add classes for 'import $ivy' and 'import $dep' to work
+        // we only need those in Scala sources, not in pure Java projects
+        if (addStubs) {
+          val maybeSnapshotRepo =
+            if (stubsVersion.endsWith("SNAPSHOT"))
+              Seq(coursier.Repositories.sonatype("snapshots").root)
+            else Nil
+          value {
+            artifacts(
+              Positioned.none(Seq(dep"$stubsOrganization:$stubsModuleName:$stubsVersion")),
+              allExtraRepositories,
+              scalaArtifactsParamsOpt.map(_.params),
+              logger,
+              cache.withMessage("Downloading internal stub dependency")
+            ).map(_.map(_._2))
           }
-          else
-            Nil
+        }
+        else
+          Nil
+      }
+      else
+        Nil
 
-        val addJvmRunner0 = addJvmRunner.getOrElse(true)
+    val (hasRunner, extraRunnerJars) =
+      if (scalaOpt.nonEmpty) {
+        val addJvmRunner0 = addJvmRunner.getOrElse(false)
         val runnerJars =
           if (addJvmRunner0) {
             val maybeSnapshotRepo =
@@ -358,7 +362,7 @@ object Artifacts {
           else
             Nil
 
-        (addJvmRunner0, stubsJars ++ runnerJars)
+        (addJvmRunner0, runnerJars)
       }
       else
         (false, Nil)
@@ -389,7 +393,7 @@ object Artifacts {
       fetchRes.fullDetailedArtifacts.collect { case (d, p, a, Some(f)) =>
         (d, p, a, os.Path(f, Os.pwd))
       },
-      extraClassPath,
+      extraClassPath ++ extraRunnerJars,
       extraCompileOnlyJars ++ extraStubsJars,
       extraSourceJars,
       scalaOpt,
