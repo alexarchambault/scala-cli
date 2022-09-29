@@ -255,8 +255,7 @@ object Artifacts {
 
         val internalDependencies =
           jsTestBridgeDependencies ++
-            nativeTestInterfaceDependencies ++
-            scalapyDependencies
+            nativeTestInterfaceDependencies
 
         val scala = ScalaArtifacts(
           compilerDependencies,
@@ -265,6 +264,7 @@ object Artifacts {
           scalaJsCli,
           scalaNativeCli,
           internalDependencies,
+          scalapyDependencies,
           scalaArtifactsParams.params
         )
         Some(scala)
@@ -277,7 +277,9 @@ object Artifacts {
       jvmTestRunnerDependencies.map(Positioned.none) ++
         scalaOpt.toSeq.flatMap(_.internalDependencies).map(Positioned.none) ++
         jmhDependencies.map(Positioned.none)
-    val updatedDependencies = dependencies ++ internalDependencies
+    val updatedDependencies = dependencies ++
+      scalaOpt.toSeq.flatMap(_.extraDependencies).map(Positioned.none) ++
+      internalDependencies
 
     val updatedDependenciesMessage = {
       val b           = new mutable.StringBuilder("Downloading ")
@@ -388,7 +390,7 @@ object Artifacts {
     Artifacts(
       javacPlugins0,
       extraJavacPlugins,
-      dependencies.map(_.value),
+      (dependencies).map(_.value) ++ scalaOpt.toSeq.flatMap(_.extraDependencies),
       internalDependencies.map(_.value),
       fetchRes.fullDetailedArtifacts.collect { case (d, p, a, Some(f)) =>
         (d, p, a, os.Path(f, Os.pwd))
