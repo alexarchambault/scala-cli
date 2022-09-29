@@ -83,9 +83,7 @@ object Repl extends ScalaCommand[ReplOptions] {
       ),
       internal = baseOptions.internal.copy(
         addRunnerDependencyOpt = baseOptions.internal.addRunnerDependencyOpt
-          .orElse(Some(false))
-      ),
-      internal = baseOptions.internal.copy(
+          .orElse(Some(false)),
         keepResolution = baseOptions.internal.keepResolution || spark
       )
     )
