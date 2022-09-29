@@ -203,10 +203,6 @@ object SharedOptionsUtil extends CommandHelpers {
         scalaJsOptions = scalaJsOptions(js),
         scalaNativeOptions = scalaNativeOptions(native),
         javaOptions = value(scala.cli.commands.util.JvmUtils.javaOptions(jvm)),
-        internalDependencies = bo.InternalDependenciesOptions(
-          addStubsDependencyOpt = addStubs,
-          addRunnerDependencyOpt = runner
-        ),
         jmhOptions = bo.JmhOptions(
           addJmhDependencies =
             if (enableJmh) jmhVersion.orElse(Some(Constants.jmhVersion))
@@ -229,7 +225,9 @@ object SharedOptionsUtil extends CommandHelpers {
           localRepository = LocalRepo.localRepo(directories.directories.localRepoDir),
           verbosity = Some(logging.verbosity),
           strictBloopJsonCheck = strictBloopJsonCheck,
-          interactive = Some(() => interactive)
+          interactive = Some(() => interactive),
+          addStubsDependencyOpt = addStubs,
+          addRunnerDependencyOpt = runner
         ),
         notForBloopOptions = bo.PostBuildOptions(
           scalaJsLinkerOptions = linkerOptions(js)

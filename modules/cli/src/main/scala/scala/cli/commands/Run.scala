@@ -77,16 +77,14 @@ object Run extends ScalaCommand[RunOptions] with BuildCommandHelpers {
           }
         }
       ),
-      internalDependencies = baseOptions.internalDependencies.copy(
-        addRunnerDependencyOpt = baseOptions.internalDependencies.addRunnerDependencyOpt.orElse {
+      internal = baseOptions.internal.copy(
+        addRunnerDependencyOpt = baseOptions.internal.addRunnerDependencyOpt.orElse {
           runMode(options) match {
             case _: RunMode.Spark | RunMode.HadoopJar =>
               Some(false)
             case RunMode.Default => None
           }
-        }
-      ),
-      internal = baseOptions.internal.copy(
+        },
         keepResolution = baseOptions.internal.keepResolution || {
           runMode(options) match {
             case _: RunMode.Spark | RunMode.HadoopJar => true

@@ -98,12 +98,6 @@ object Artifacts {
     maybeRecoverOnError: BuildException => Option[BuildException]
   ): Either[BuildException, Artifacts] = either {
 
-    val addJvmRunner0 = addJvmRunner.getOrElse(true)
-    val jvmRunnerDependencies =
-      if (addJvmRunner0)
-        Seq(dep"$runnerOrganization::$runnerModuleName:$runnerVersion")
-      else
-        Nil
     val jvmTestRunnerDependencies =
       if (addJvmTestRunner)
         Seq(dep"$testRunnerOrganization::$testRunnerModuleName:$testRunnerVersion")
@@ -115,11 +109,9 @@ object Artifacts {
     }
 
     val maybeSnapshotRepo = {
-      val hasSnapshots = (jvmRunnerDependencies ++ jvmTestRunnerDependencies)
-        .exists(_.version.endsWith("SNAPSHOT")) ||
+      val hasSnapshots = jvmTestRunnerDependencies.exists(_.version.endsWith("SNAPSHOT")) ||
         scalaArtifactsParamsOpt.flatMap(_.scalaNativeCliVersion).exists(_.endsWith("SNAPSHOT"))
-      val stubsNeedSonatypeSnapshots = addStubs && stubsVersion.endsWith("SNAPSHOT")
-      if (hasSnapshots || stubsNeedSonatypeSnapshots)
+      if (hasSnapshots)
         Seq(coursier.Repositories.sonatype("snapshots").root)
       else
         Nil
@@ -282,8 +274,7 @@ object Artifacts {
     }
 
     val internalDependencies =
-      jvmRunnerDependencies.map(Positioned.none) ++
-        jvmTestRunnerDependencies.map(Positioned.none) ++
+      jvmTestRunnerDependencies.map(Positioned.none) ++
         scalaOpt.toSeq.flatMap(_.internalDependencies).map(Positioned.none) ++
         jmhDependencies.map(Positioned.none)
     val updatedDependencies = dependencies ++ internalDependencies
@@ -322,21 +313,55 @@ object Artifacts {
       )
     }
 
-    val extraStubsJars =
-      // stubs add classes for 'import $ivy' and 'import $dep' to work
-      // we only need those in Scala sources, not in pure Java projects
-      if (scalaOpt.nonEmpty && addStubs)
-        value {
-          artifacts(
-            Positioned.none(Seq(dep"$stubsOrganization:$stubsModuleName:$stubsVersion")),
-            allExtraRepositories,
-            scalaArtifactsParamsOpt.map(_.params),
-            logger,
-            cache.withMessage("Downloading internal stub dependency")
-          ).map(_.map(_._2))
-        }
+    val (hasRunner, extraStubsJars) =
+      if (scalaOpt.nonEmpty) {
+        val stubsJars =
+          // stubs add classes for 'import $ivy' and 'import $dep' to work
+          // we only need those in Scala sources, not in pure Java projects
+          if (addStubs) {
+            val maybeSnapshotRepo =
+              if (stubsVersion.endsWith("SNAPSHOT"))
+                Seq(coursier.Repositories.sonatype("snapshots").root)
+              else Nil
+            value {
+              artifacts(
+                Positioned.none(Seq(dep"$stubsOrganization:$stubsModuleName:$stubsVersion")),
+                allExtraRepositories,
+                scalaArtifactsParamsOpt.map(_.params),
+                logger,
+                cache.withMessage("Downloading internal stub dependency")
+              ).map(_.map(_._2))
+            }
+          }
+          else
+            Nil
+
+        val addJvmRunner0 = addJvmRunner.getOrElse(true)
+        val runnerJars =
+          if (addJvmRunner0) {
+            val maybeSnapshotRepo =
+              if (runnerVersion.endsWith("SNAPSHOT"))
+                Seq(coursier.Repositories.sonatype("snapshots").root)
+              else Nil
+            value {
+              artifacts(
+                Positioned.none(
+                  Seq(dep"$runnerOrganization::$runnerModuleName:$runnerVersion,intransitive")
+                ),
+                extraRepositories ++ maybeSnapshotRepo,
+                scalaArtifactsParamsOpt.map(_.params),
+                logger,
+                cache.withMessage("Downloading runner dependency")
+              ).map(_.map(_._2))
+            }
+          }
+          else
+            Nil
+
+        (addJvmRunner0, stubsJars ++ runnerJars)
+      }
       else
-        Nil
+        (false, Nil)
 
     val javacPlugins0 = value {
       javacPluginDependencies
@@ -368,7 +393,7 @@ object Artifacts {
       extraCompileOnlyJars ++ extraStubsJars,
       extraSourceJars,
       scalaOpt,
-      addJvmRunner0,
+      hasRunner,
       if (keepResolution) Some(fetchRes.resolution) else None
     )
   }

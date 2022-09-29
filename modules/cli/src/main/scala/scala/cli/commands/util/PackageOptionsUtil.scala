@@ -101,9 +101,7 @@ object PackageOptionsUtil {
         internal = baseOptions.internal.copy(
           // computing the provided modules sub-graph need the final Resolution instance
           // Spark packaging adds provided modules, so it needs it too
-          keepResolution = provided.nonEmpty || packageTypeOpt.contains(PackageType.Spark)
-        ),
-        internalDependencies = baseOptions.internalDependencies.copy(
+          keepResolution = provided.nonEmpty || packageTypeOpt.contains(PackageType.Spark),
           addRunnerDependencyOpt = Some(false)
         )
       )
