@@ -54,6 +54,9 @@ final case class PublishSetupOptions(
   @HelpMessage("Whether to check if a GitHub workflow already exists (one for publishing is written if none is found)")
     checkWorkflow: Option[Boolean] = None,
   @Group("Publishing")
+  @HelpMessage("Whether to check if a .gitignore file already exists (one is written if none is found)")
+    checkGitignore: Option[Boolean] = None,
+  @Group("Publishing")
   @HelpMessage("Dummy mode - don't upload any secret to GitHub")
     dummy: Boolean = false
 ) extends HasLoggingOptions
