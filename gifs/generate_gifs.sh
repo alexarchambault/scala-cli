@@ -5,10 +5,10 @@ set -exo pipefail
 # Generate svg files for arguments based on create scripts with scenarios
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
-OUT=$SCRIPT_DIR/.scala
+OUT="$SCRIPT_DIR/.scala"
 
-mkdir -p $OUT 
-rm -f $OUT/failures.txt
+mkdir -p "$OUT"
+rm -f "$OUT/failures.txt"
 
 tty && TTY_OPS="-it"
 
@@ -48,7 +48,7 @@ do
 done
 
 if [ -z "$no_build" ]; then
-  docker build $SCRIPT_DIR --tag gif-renderer  
+  docker build $SCRIPT_DIR --tag gif-renderer
   docker build $SCRIPT_DIR/svg_render/ --tag svg_rendrer
 fi
 
@@ -58,28 +58,28 @@ for arg in "$@"
 do
 
 
-  if [[ "$arg" == --* ]]; then 
-    echo "Skipping $name" 
+  if [[ "$arg" == --* ]]; then
+    echo "Skipping $name"
   else
-    fileName=$(basename "$arg")
-    name=${fileName%%.sh} 
+    fileName="$(basename "$arg")"
+    name="${fileName%%.sh}"
 
     if ! [[ -f "$SCRIPT_DIR/scenarios/$name.sh" ]]; then
         echo "Scenario $SCRIPT_DIR/scenarios/$name.sh does not exist."
         exit 1
     fi
 
-    echo processing $name with $TTY_OPS
+    echo "processing $name with $TTY_OPS"
     svg_render_mappings="-v $SCRIPT_DIR/../website/static/img:/data -v $OUT/.scala:/out"
     svg_render_ops="--in /out/$name.cast --width $columns --height $rows --term iterm2 --padding 20"
 
     # Run the scenario
     failure=
 
-    if [ -z "$no_record" ]; then  
-      docker run --rm $TTY_OPS -v  $OUT/.scala:/data/out gif-renderer ./run_scenario.sh $name || (
+    if [ -z "$no_record" ]; then
+      docker run --rm $TTY_OPS -v "$OUT/.scala:/data/out" gif-renderer ./run_scenario.sh "$name" || (
         echo "Scenario failed: $name" &&
-        echo $name >> $OUT/failures.txt &&
+        echo "$name" >> "$OUT/failures.txt" &&
         failure=true
       )
     fi
@@ -95,7 +95,7 @@ do
         )
       fi
       if [ -z "$no_gifs" ]; then
-        docker run --rm $svg_render_mappings asciinema/asciicast2gif -w $columns -h $rows -t monokai /out/$name.cast /data/gifs/$name.gif && 
+        docker run --rm $svg_render_mappings asciinema/asciicast2gif -w $columns -h $rows -t monokai /out/$name.cast /data/gifs/$name.gif &&
         docker run --rm $svg_render_mappings asciinema/asciicast2gif -w $columns -h $rows -t solarized-dark /out/$name.cast /data/dark/gifs/$name.gif || (
           echo "Scenario failed: $name" &&
           echo $name >> $OUT/failures.txt &&
@@ -103,12 +103,12 @@ do
         )
       fi
     fi
-    echo "done" 
+    echo "done"
   fi
 done
 
 failures=
-test -f "$OUT/failures.txt" && failures=$(cat "$OUT/failures.txt") 
+test -f "$OUT/failures.txt" && failures=$(cat "$OUT/failures.txt")
 
 if [ -n "$failures" ]; then
   echo "Scenarios failed:" &&

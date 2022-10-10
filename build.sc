@@ -123,7 +123,9 @@ object `docs-tests` extends SbtModule with ScalaCliScalafixModule with HasTests 
 
   object test extends Tests with ScalaCliTests with ScalaCliScalafixModule {
     def forkEnv = super.forkEnv() ++ extraEnv() ++ Seq(
-      "SCALA_CLI_EXAMPLES" -> (os.pwd / "examples").toString
+      "SCALA_CLI_EXAMPLES"      -> (os.pwd / "examples").toString,
+      "SCALA_CLI_GIF_SCENARIOS" -> (os.pwd / "gifs" / "scenarios").toString,
+      "SCALA_CLI_WEBSITE_IMG"   -> (os.pwd / "website" / "static" / "img").toString
     )
     def resources = T.sources {
       // Adding markdown directories here, so that they're watched for changes in watch mode
