@@ -113,7 +113,8 @@ object `docs-tests` extends SbtModule with ScalaCliScalafixModule with HasTests 
   def scalaVersion = Scala.defaultInternal
   def ivyDeps = Agg(
     Deps.fansi,
-    Deps.osLib
+    Deps.osLib,
+    Deps.pprint
   )
 
   def extraEnv = T {
