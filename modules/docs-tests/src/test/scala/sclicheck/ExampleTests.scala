@@ -15,7 +15,7 @@ class ExampleTests extends munit.FunSuite {
       val args =
         if os.exists(dir / ".opts") then os.read(dir / ".opts").split("\\s+").toSeq
         else Nil
-      os.proc(TestUtil.scalaCliPath, "--jvm", "temurin:17", args, ".")
+      os.proc(TestUtil.scalaCliPath, args, "--jvm", "temurin:17", ".")
         .call(cwd = dir, stdin = os.Inherit, stdout = os.Inherit)
     }
 
