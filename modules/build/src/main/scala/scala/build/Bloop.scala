@@ -19,6 +19,21 @@ import scala.jdk.CollectionConverters.*
 
 object Bloop {
 
+  private[build] def extraRepositoriesForBloop(
+    bloopVersion: String,
+    scalaVersion: String
+  ): Seq[coursier.core.Repository] = {
+    val snapshotRepositories =
+      if bloopVersion.endsWith("SNAPSHOT")
+      then Seq(coursier.Repositories.centralMavenSnapshots, RepositoryUtils.snapshotsRepository)
+      else Nil
+    val nightlyRepositories =
+      if scalaVersion.endsWith("-NIGHTLY")
+      then Seq(RepositoryUtils.scala3NightlyRepository)
+      else Nil
+    (snapshotRepositories ++ nightlyRepositories).distinct
+  }
+
   private object BrokenPipeInCauses {
     @tailrec
     def unapply(ex: Throwable): Option[IOException] =
@@ -78,11 +93,7 @@ object Bloop {
       val res = value {
         Artifacts.artifacts(
           Seq(Positioned.none(dep)),
-          Seq(
-            coursier.Repositories.centralMavenSnapshots,
-            RepositoryUtils.snapshotsRepository,
-            RepositoryUtils.scala3NightlyRepository
-          ),
+          extraRepositoriesForBloop(dep.version, params.scalaVersion),
           Some(params),
           logger,
           cache.withMessage(s"Downloading compilation server ${dep.version}")
