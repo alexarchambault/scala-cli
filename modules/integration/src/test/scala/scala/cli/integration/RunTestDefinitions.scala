@@ -2178,7 +2178,7 @@ abstract class RunTestDefinitions
          |""".stripMargin).fromRoot { root =>
       val res = os.proc(TestUtil.cli, "run", extraOptions, input).call(cwd = root, stderr = os.Pipe)
       expect(res.out.trim() == msg)
-      expect(res.err.trim().contains(s"JVM ($jvmId)"))
+      expect(res.err.trim().contains(s"JVM $jvmId"))
     }
   }
 

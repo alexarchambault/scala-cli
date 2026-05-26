@@ -80,7 +80,7 @@ final case class BuildOptions(
             val jvmIdSuffix =
               javaOptions.jvmIdOpt.map(_.value)
                 .orElse(Some(javaHome().value.version.toString))
-                .map(" (" + _ + ")").getOrElse("")
+                .map(" " + _).getOrElse("")
             s"JVM$jvmIdSuffix"
           case Platform.JS =>
             val scalaJsVersion = scalaJsOptions.version.getOrElse(Constants.scalaJsVersion)

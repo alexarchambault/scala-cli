@@ -853,8 +853,8 @@ abstract class CompileTestDefinitions
 
       val jvmVersion     = Constants.defaultGraalVMJavaVersion
       val expectedOutput =
-        s"""|Compiling project (Scala $actualScalaVersion, JVM ($jvmVersion))
-            |Compiled project (Scala $actualScalaVersion, JVM ($jvmVersion))""".stripMargin
+        s"""|Compiling project (Scala $actualScalaVersion, JVM $jvmVersion)
+            |Compiled project (Scala $actualScalaVersion, JVM $jvmVersion)""".stripMargin
       val actualOutput = TestUtil.fullStableOutput(result)
       assertEquals(actualOutput, expectedOutput)
 
@@ -883,12 +883,12 @@ abstract class CompileTestDefinitions
 
       val actualOutput2   = TestUtil.fullStableOutput(result2).trim
       val expectedOutput2 =
-        s"""|Compiling project (Scala $actualScalaVersion, JVM ($jvmVersion))
+        s"""|Compiling project (Scala $actualScalaVersion, JVM $jvmVersion)
             |[error] .${File.separatorChar}Main.scala:2:23
             |$expectedError
             |[error]     val msg: String = 1
             |[error]                       ^
-            |Error compiling project (Scala $actualScalaVersion, JVM ($jvmVersion))
+            |Error compiling project (Scala $actualScalaVersion, JVM $jvmVersion)
             |Compilation failed""".stripMargin
       assertEquals(actualOutput2, expectedOutput2)
 
@@ -908,8 +908,8 @@ abstract class CompileTestDefinitions
 
       val actualOutput3   = TestUtil.fullStableOutput(result3)
       val expectedOutput3 =
-        s"""|Compiling project (Scala $actualScalaVersion, JVM ($jvmVersion))
-            |Compiled project (Scala $actualScalaVersion, JVM ($jvmVersion))""".stripMargin
+        s"""|Compiling project (Scala $actualScalaVersion, JVM $jvmVersion)
+            |Compiled project (Scala $actualScalaVersion, JVM $jvmVersion)""".stripMargin
       assertEquals(actualOutput3, expectedOutput3)
     }
   }
