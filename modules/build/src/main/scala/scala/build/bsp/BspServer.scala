@@ -290,9 +290,11 @@ class BspServer(
           case Some(originalWs) =>
             target.setBaseDirectory(originalWs.toNIO.toUri.toASCIIString)
           case None
-              if isIntelliJ && baseDirectory.getName == Constants.workspaceDirName
-              && baseDirectory.getParentFile != null =>
-            target.setBaseDirectory(baseDirectory.getParentFile.toPath.toUri.toASCIIString)
+              if isIntelliJ &&
+              os.Path(baseDirectory).endsWith(Constants.workspaceDirName) =>
+            val workspaceParent = os.Path(baseDirectory) /
+              os.RelPath(Vector.empty, Constants.workspaceDirName.segments.length)
+            target.setBaseDirectory(workspaceParent.toNIO.toUri.toASCIIString)
           case _ => // leave Bloop's value untouched
         }
       }

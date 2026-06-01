@@ -543,7 +543,14 @@ trait Core extends ScalaCliCrossSbtModule
           .mkString(", ")})
          |  def scala38MinJavaVersion = ${Java.minimumScala38Java}
          |
-         |  def workspaceDirName = "$workspaceDirName"
+         |  lazy val workspaceDirName: os.SubPath = {
+         |    val default = "$workspaceDirName"
+         |    val name = Option(System.getenv("SCALA_CLI_WORKSPACE_DIR_NAME"))
+         |      .map(_.trim)
+         |      .filter(_.nonEmpty)
+         |      .getOrElse(default)
+         |    os.SubPath(name)
+         |  }
          |  def projectFileName = "$projectFileName"
          |  def jvmPropertiesFileName = "$jvmPropertiesFileName"
          |  def scalacArgumentsFileName = "scalac.args.txt"

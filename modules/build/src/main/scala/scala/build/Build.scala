@@ -847,7 +847,7 @@ object Build {
           val allScopesArtifacts = (main ++ test).distinct
 
           allScopesArtifacts
-            .filterNot(_.segments.contains(Constants.workspaceDirName))
+            .filterNot(_.segments.toSeq.containsSlice(Constants.workspaceDirName.segments))
         }
         .getOrElse(Nil)
       for (artifact <- artifacts) {
